@@ -41,7 +41,7 @@ public class SlideUpViewActivity extends AppCompatActivity {
 
         slideUp.setSlideListener(new SlideUp.SlideListener() {
             @Override
-            public void onSlideDown(float percent) {
+            public void onSlide(float percent) {
                 dim.setAlpha(1 - (percent / 100));
             }
 

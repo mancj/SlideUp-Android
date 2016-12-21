@@ -169,7 +169,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     private void notifyPercentChanged(float percent){
         if (slideListener != null)
         {
-            slideListener.onSlideDown(percent);
+            slideListener.onSlide(percent);
         }
     }
 
@@ -206,7 +206,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     }
 
     public interface SlideListener {
-        void onSlideDown(float percent);
+        void onSlide(float percent);
         void onVisibilityChanged(int visibility);
     }
 
