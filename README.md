@@ -8,8 +8,26 @@ SlideUp is a small library that allows you to add sweet slide effect to any view
 
 ---
 # Usage
+**Get SlideUp library**
 
-To add the SlideUp into your project, follow these three simple steps:
+Add the JitPack repository to your build file.
+Add it in your root build.gradle at the end of repositories:
+```groovy
+allprojects {
+  repositories {
+    ...
+    maven { url 'https://jitpack.io' }
+  }
+}
+```
+Add the dependency
+```groovy
+dependencies {
+    compile 'com.github.mancj:SlideUp-Android:1.0-beta'
+}
+```
+
+**To add the SlideUp into your project, follow these three simple steps:**
 
 ### Step 1:
 create any type of layout
