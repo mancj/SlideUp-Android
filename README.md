@@ -85,3 +85,5 @@ slideUp.setSlideListener(new SlideUp.SlideListener() {
     }
 });
 ```
+-----
+Player designed by [Jauzee](https://github.com/Jauzee)
