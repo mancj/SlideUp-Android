@@ -38,32 +38,32 @@ SlideUp slideUp = new SlideUp(slideView);
 
 ```java
 slideView = findViewById(R.id.slideView);
-        dim = findViewById(R.id.dim);
-        fab = (FloatingActionButton) findViewById(R.id.fab);
+dim = findViewById(R.id.dim);
+fab = (FloatingActionButton) findViewById(R.id.fab);
 
-        slideUp = new SlideUp(slideView);
-        slideUp.hideImmediately();
+slideUp = new SlideUp(slideView);
+slideUp.hideImmediately();
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                slideUp.animateIn();
-                fab.hide();
-            }
-        });
+fab.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View view) {
+        slideUp.animateIn();
+        fab.hide();
+    }
+});
 
-        slideUp.setSlideListener(new SlideUp.SlideListener() {
-            @Override
-            public void onSlideDown(float percent) {
-                dim.setAlpha(1 - (percent / 100));
-            }
+slideUp.setSlideListener(new SlideUp.SlideListener() {
+    @Override
+    public void onSlideDown(float percent) {
+        dim.setAlpha(1 - (percent / 100));
+    }
 
-            @Override
-            public void onVisibilityChanged(int visibility) {
-                if (visibility == View.GONE)
-                {
-                    fab.show();
-                }
-            }
-        });
+    @Override
+    public void onVisibilityChanged(int visibility) {
+        if (visibility == View.GONE)
+        {
+            fab.show();
+        }
+    }
+});
 ```
