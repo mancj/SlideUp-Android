@@ -40,12 +40,12 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     private float maxSlidePosition;
     private float viewHeight;
 
-    private boolean DownToUp = true;
+    private boolean downToUp = true;
     
     private boolean debug = false;
     
     private SlideUp(Builder<T> builder){
-        DownToUp = builder.vectorDownToUp;
+        downToUp = builder.vectorDownToUp;
         listeners = builder.listeners;
         sliderView = builder.sliderView;
         startState = builder.startState;
@@ -62,7 +62,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
             @Override
             public void onGlobalLayout() {
                 viewHeight = sliderView.getHeight();
-                sliderView.setPivotY(DownToUp ? 0 : viewHeight);
+                sliderView.setPivotY(downToUp ? 0 : viewHeight);
                 updateToCurrentState();
                 ViewTreeObserver observer = sliderView.getViewTreeObserver();
                 if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN) {
@@ -87,11 +87,11 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     }
     
     public void setDownToUp(){
-        DownToUp = true;
+        downToUp = true;
     }
 
     public void setUpToDown(){
-        DownToUp = false;
+        downToUp = false;
     }
 
     public boolean isVisible(){
@@ -142,14 +142,14 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     }
 
     public void hide(){
-        this.slideAnimationTo = DownToUp ? sliderView.getHeight() : -sliderView.getHeight();
+        this.slideAnimationTo = downToUp ? sliderView.getHeight() : -sliderView.getHeight();
         valueAnimator.setFloatValues(sliderView.getTranslationY(), slideAnimationTo);
         valueAnimator.start();
     }
     
     public void hideImmediately() {
         if (sliderView.getHeight() > 0){
-            sliderView.setTranslationY(DownToUp ? viewHeight : -viewHeight);
+            sliderView.setTranslationY(downToUp ? viewHeight : -viewHeight);
             sliderView.setVisibility(GONE);
             notifyVisibilityChanged(GONE);
         }else {
@@ -177,7 +177,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        if (DownToUp)
+        if (downToUp)
             return onTouchDownToUp(event);
         else
             return onTouchUpToDown(event);
@@ -214,7 +214,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
                 float slideAnimationFrom = sliderView.getTranslationY();
                 boolean mustShow = maxSlidePosition > event.getRawY();
                 boolean scrollableAreaConsumed = sliderView.getTranslationY() > sliderView.getHeight() / 5;
-            
+
                 if (scrollableAreaConsumed && !mustShow){
                     slideAnimationTo = sliderView.getHeight();
                 }else {
@@ -239,6 +239,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
                 viewHeight = sliderView.getHeight();
                 startPositionY = event.getRawY();
                 viewStartPositionY = sliderView.getTranslationY();
+                maxSlidePosition = viewHeight;
                 if (touchableArea < touchedArea){
                     canSlide = false;
                 }
@@ -258,9 +259,9 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
                 break;
             case MotionEvent.ACTION_UP:
                 float slideAnimationFrom = -sliderView.getTranslationY();
-                boolean mustShow = maxSlidePosition > event.getRawY();
+                boolean mustShow = maxSlidePosition < event.getRawY();
                 boolean scrollableAreaConsumed = sliderView.getTranslationY() < -sliderView.getHeight() / 5;
-            
+
                 if (scrollableAreaConsumed && !mustShow){
                     slideAnimationTo = sliderView.getHeight();
                 }else {
@@ -278,12 +279,12 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     @Override
     public void onAnimationUpdate(ValueAnimator animation) {
         float val = (float) animation.getAnimatedValue();
-        sliderView.setTranslationY(DownToUp ? val : -val);
-        float visibleDistance = DownToUp ?
+        sliderView.setTranslationY(downToUp ? val : -val);
+        float visibleDistance = downToUp ?
                 sliderView.getY() - sliderView.getTop()
                 :
                 sliderView.getTop() + sliderView.getY();
-        float percents = (visibleDistance) * 100 / (DownToUp ? viewHeight : -viewHeight);
+        float percents = (visibleDistance) * 100 / (downToUp ? viewHeight : -viewHeight);
         notifyPercentChanged(percents);
     }
 

@@ -45,7 +45,7 @@ public class SlideUpViewActivity extends AppCompatActivity {
         slideUp = SlideUp.Builder.forView(slideView)
                 .withListeners(slideUpListener)
                 .withDownToUpVector(false)
-                .withLoggingEnabled(false)
+                .withLoggingEnabled(true)
                 .withStartState(SlideUp.State.HIDDEN)
                 .build();
 
