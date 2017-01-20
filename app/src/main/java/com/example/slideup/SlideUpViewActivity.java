@@ -4,8 +4,8 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.view.Menu;
+import android.view.View;
 
 import com.mancj.slideup.SlideUp;
 
@@ -26,18 +26,18 @@ public class SlideUpViewActivity extends AppCompatActivity {
         dim = findViewById(R.id.dim);
         fab = (FloatingActionButton) findViewById(R.id.fab);
 
-        slideUp = new SlideUp(slideView);
+        slideUp = new SlideUp<>(slideView);
         slideUp.hideImmediately();
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                slideUp.animateIn();
+                slideUp.show();
                 fab.hide();
             }
         });
 
-        slideUp.addSlideListener(new SlideUp.SlideListener() {
+        slideUp.addSlideListener(new SlideUp.Listener() {
             @Override
             public void onSlide(float percent) {
                 dim.setAlpha(1 - (percent / 100));
