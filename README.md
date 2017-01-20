@@ -27,7 +27,7 @@ allprojects {
 Add the dependency
 ```groovy
 dependencies {
-    compile 'com.github.mancj:SlideUp-Android:1.0-beta'
+    compile 'com.github.mancj:SlideUp-Android:1.2-beta'
 }
 ```
 
@@ -52,7 +52,10 @@ View slideView = findViewById(R.id.slideView);
 ### Step 3:
 Create a SlideUp object and pass in your view
 ```java
-SlideUp slideUp = new SlideUp(slideView);
+slideUp = SlideUp.Builder
+                .forView(slideView)
+                .withStartState(SlideUp.State.HIDDEN)
+                .build();
 ```
 ## Enjoy!
 ---
@@ -63,18 +66,8 @@ slideView = findViewById(R.id.slideView);
 dim = findViewById(R.id.dim);
 fab = (FloatingActionButton) findViewById(R.id.fab);
 
-slideUp = new SlideUp(slideView);
-slideUp.hideImmediately();
 
-fab.setOnClickListener(new View.OnClickListener() {
-    @Override
-    public void onClick(View view) {
-        slideUp.animateIn();
-        fab.hide();
-    }
-});
-
-slideUp.setSlideListener(new SlideUp.SlideListener() {
+SlideUp.Listener slideUpListener = new SlideUp.Listener() {
     @Override
     public void onSlide(float percent) {
         dim.setAlpha(1 - (percent / 100));
@@ -82,12 +75,28 @@ slideUp.setSlideListener(new SlideUp.SlideListener() {
 
     @Override
     public void onVisibilityChanged(int visibility) {
-        if (visibility == View.GONE)
-        {
+        if (visibility == View.GONE){
             fab.show();
         }
     }
+};
+
+slideUp = SlideUp.Builder.forView(slideView)
+        .withListeners(slideUpListener)
+        .withDownToUpVector(true)
+        .withLoggingEnabled(true)
+        .withStartState(SlideUp.State.HIDDEN)
+        .build();
+
+fab.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View view) {
+        slideUp.show();
+        fab.hide();
+    }
 });
 ```
+See [SlideUpViewActivity.java](https://github.com/mancj/SlideUp-Android/blob/master/app/src/main/java/com/example/slideup/SlideUpViewActivity.java)
+
 -----
 The player is designed by [Jauzee](https://github.com/Jauzee)
