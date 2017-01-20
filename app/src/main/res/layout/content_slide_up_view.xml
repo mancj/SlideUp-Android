@@ -12,37 +12,38 @@
     tools:context="com.example.slideup.SlideUpViewActivity"
     tools:showIn="@layout/activity_slide_up_view">
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/slideView"
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="26dp"
-        android:background="@drawable/rounded_corners_bg">
-
-        <TextView
-            android:text="Slide it down"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/textView"
-            android:gravity="center_horizontal"
-            android:layout_marginTop="16dp"
-            android:textColor="@color/grey200" />
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_keyboard_arrow_down_black_24dp"
-            android:id="@+id/imageView"
-            android:layout_marginTop="4dp" />
+        android:background="@drawable/rounded_up_corners_bg">
 
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/mushroom"
             android:id="@+id/imageView2"
-            android:layout_marginTop="24dp" />
+            android:layout_marginTop="24dp"/>
 
-    </LinearLayout>
+        <ImageView
+            android:layout_below="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_keyboard_arrow_down_black_24dp"
+            android:id="@+id/imageView"
+            android:layout_marginTop="4dp"/>
+
+        <TextView
+            android:layout_alignParentTop="true"
+            android:text="Slide it down"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView"
+            android:gravity="center_horizontal"
+            android:textColor="@color/grey200"
+            android:layout_marginTop="16dp" />
+
+    </RelativeLayout>
 
 </RelativeLayout>
