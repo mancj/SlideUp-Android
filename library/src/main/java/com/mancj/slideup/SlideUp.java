@@ -263,7 +263,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
                 boolean scrollableAreaConsumed = sliderView.getTranslationY() < -sliderView.getHeight() / 5;
 
                 if (scrollableAreaConsumed && !mustShow){
-                    slideAnimationTo = sliderView.getHeight();
+                    slideAnimationTo = sliderView.getHeight() + sliderView.getTop();
                 }else {
                     slideAnimationTo = 0;
                 }
@@ -280,15 +280,16 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     public void onAnimationUpdate(ValueAnimator animation) {
         float val = (float) animation.getAnimatedValue();
         sliderView.setTranslationY(downToUp ? val : -val);
-        float visibleDistance = downToUp ?
-                sliderView.getY() - sliderView.getTop()
-                :
-                sliderView.getTop() + sliderView.getY();
+        float visibleDistance = downToUp
+                ? sliderView.getY() - sliderView.getTop()
+                : sliderView.getY() + sliderView.getTop();
         float percents = (visibleDistance) * 100 / (downToUp ? viewHeight : -viewHeight);
         notifyPercentChanged(percents);
     }
 
     private void notifyPercentChanged(float percent){
+        percent = percent > 100 ? 100 : percent;
+        percent = percent < 0 ? 0 : percent;
         if (!listeners.isEmpty()){
             for (int i = 0; i < listeners.size(); i++) {
                 Listener l = listeners.get(i);
