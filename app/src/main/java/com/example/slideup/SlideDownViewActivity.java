@@ -12,7 +12,7 @@ import android.view.View;
 
 import com.mancj.slideup.SlideUp;
 
-public class SlideUpViewActivity extends AppCompatActivity {
+public class SlideDownViewActivity extends AppCompatActivity {
     private SlideUp slideUp;
     private View dim;
     private View slideView;
@@ -21,7 +21,7 @@ public class SlideUpViewActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_slide_up_view);
+        setContentView(R.layout.activity_slide_down_view);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -43,7 +43,7 @@ public class SlideUpViewActivity extends AppCompatActivity {
                         }
                     }
                 })
-                .withStartGravity(Gravity.BOTTOM)
+                .withStartGravity(Gravity.TOP)
                 .withLoggingEnabled(true)
                 .withStartState(SlideUp.State.HIDDEN)
                 .build();
@@ -60,22 +60,21 @@ public class SlideUpViewActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_slide_up_view, menu);
+        getMenuInflater().inflate(R.menu.menu_slide_down_view, menu);
         return true;
     }
-    
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
+            case R.id.action_slide_up:
+                startActivity(new Intent(this, SlideUpViewActivity.class));
+                break;
             case R.id.action_slide_start:
                 startActivity(new Intent(this, SlideStartViewActivity.class));
                 break;
             case R.id.action_slide_end:
                 startActivity(new Intent(this, SlideEndViewActivity.class));
-                break;
-            case R.id.action_slide_down:
-                startActivity(new Intent(this, SlideDownViewActivity.class));
                 break;
         }
         return super.onOptionsItemSelected(item);

@@ -2,7 +2,11 @@
     <string name="app_name">SlideUp</string>
     <string name="slide_up_title">SlideUp</string>
     <string name="slide_down_title">SlideDown</string>
+    <string name="slide_start_title">SlideStart</string>
+    <string name="slide_end_title">SlideEnd</string>
     <string name="slide_up_sample">SlideUp sample</string>
     <string name="slide_down_sample">SlideDown sample</string>
+    <string name="slide_start_sample">SlideStart sample</string>
+    <string name="slide_end_sample">SlideEnd sample</string>
     <string name="action_settings">Settings</string>
 </resources>

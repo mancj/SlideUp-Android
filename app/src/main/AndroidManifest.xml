@@ -23,6 +23,16 @@
             android:label="@string/slide_down_title"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
+        <activity
+            android:name=".SlideEndViewActivity"
+            android:label="@string/slide_end_title"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
+            android:name=".SlideStartViewActivity"
+            android:label="@string/slide_start_title"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
     </application>
 
 </manifest>
