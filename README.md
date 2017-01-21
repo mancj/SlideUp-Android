@@ -27,7 +27,7 @@ allprojects {
 Add the dependency
 ```groovy
 dependencies {
-    compile 'com.github.mancj:SlideUp-Android:1.2-beta'
+    compile 'com.github.mancj:SlideUp-Android:2.0'
 }
 ```
 
@@ -55,6 +55,7 @@ Create a SlideUp object and pass in your view
 slideUp = SlideUp.Builder
                 .forView(slideView)
                 .withStartState(SlideUp.State.HIDDEN)
+                .withStartGravity(Gravity.BOTTOM)
                 .build();
 ```
 ## Enjoy!
@@ -82,11 +83,11 @@ SlideUp.Listener slideUpListener = new SlideUp.Listener() {
 };
 
 slideUp = SlideUp.Builder.forView(slideView)
-        .withListeners(slideUpListener)
-        .withDownToUpVector(true)
-        .withLoggingEnabled(true)
-        .withStartState(SlideUp.State.HIDDEN)
-        .build();
+              .withListeners(slideUpListener)
+              .withStartGravity(Gravity.BOTTOM)
+              .withLoggingEnabled(true)
+              .withStartState(SlideUp.State.HIDDEN)
+              .build();
 
 fab.setOnClickListener(new View.OnClickListener() {
     @Override
