@@ -1,5 +1,6 @@
 package com.example.slideup;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -45,7 +46,7 @@ public class SlideUpViewActivity extends AppCompatActivity {
 
         slideUp = SlideUp.Builder.forView(slideView)
                 .withListeners(slideUpListener)
-				.withStartGravity(Gravity.BOTTOM)
+                .withStartGravity(Gravity.BOTTOM)
                 .withLoggingEnabled(true)
                 .withStartState(SlideUp.State.HIDDEN)
                 .build();

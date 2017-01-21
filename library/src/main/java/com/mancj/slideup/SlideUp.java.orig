@@ -91,7 +91,11 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
 
     private boolean isRTL;
 
+<<<<<<< HEAD
+    private boolean downToUp = true;
+=======
     private int startGravity;
+>>>>>>> 27623c72a0ff89584bce873f02e56feb11179750
     
     private boolean debug = false;
 
@@ -189,7 +193,11 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     }
     
     private SlideUp(Builder<T> builder){
+<<<<<<< HEAD
+        downToUp = builder.vectorDownToUp;
+=======
         startGravity = builder.startGravity;
+>>>>>>> 27623c72a0ff89584bce873f02e56feb11179750
         listeners = builder.listeners;
         sliderView = builder.sliderView;
         startState = builder.startState;
@@ -208,6 +216,9 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
             @Override
             public void onGlobalLayout() {
                 viewHeight = sliderView.getHeight();
+<<<<<<< HEAD
+                sliderView.setPivotY(downToUp ? 0 : viewHeight);
+=======
                 viewWidth = sliderView.getWidth();
                 switch (startGravity){
                     case TOP:    sliderView.setPivotY(viewHeight); break;
@@ -215,6 +226,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
                     case START:  sliderView.setPivotX(0);          break;
                     case END:    sliderView.setPivotX(viewWidth);  break;
                 }
+>>>>>>> 27623c72a0ff89584bce873f02e56feb11179750
                 updateToCurrentState();
                 ViewTreeObserver observer = sliderView.getViewTreeObserver();
                 if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN) {
@@ -237,6 +249,17 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
                 break;
         }
     }
+<<<<<<< HEAD
+    
+    public void setDownToUp(){
+        downToUp = true;
+    }
+
+    public void setUpToDown(){
+        downToUp = false;
+    }
+=======
+>>>>>>> 27623c72a0ff89584bce873f02e56feb11179750
 
     public boolean isVisible(){
         return sliderView.getVisibility() == VISIBLE;
@@ -279,11 +302,27 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     }
 
     public void hide(){
+<<<<<<< HEAD
+        this.slideAnimationTo = downToUp ? sliderView.getHeight() : -sliderView.getHeight();
+        valueAnimator.setFloatValues(sliderView.getTranslationY(), slideAnimationTo);
+        valueAnimator.start();
+    }
+    
+    public void hideImmediately() {
+        if (sliderView.getHeight() > 0){
+            sliderView.setTranslationY(downToUp ? viewHeight : -viewHeight);
+            sliderView.setVisibility(GONE);
+            notifyVisibilityChanged(GONE);
+        }else {
+            startState = HIDDEN;
+        }
+=======
         hide(false);
     }
     
     public void hideImmediately() {
         hide(true);
+>>>>>>> 27623c72a0ff89584bce873f02e56feb11179750
     }
     
     public void showImmediately() {
@@ -354,6 +393,8 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
                 break;
         }
     }
+<<<<<<< HEAD
+=======
     
     private void show(boolean immediately){
         switch (startGravity) {
@@ -392,6 +433,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         }
     }
 
+>>>>>>> 27623c72a0ff89584bce873f02e56feb11179750
 
     private void createAnimation(){
         valueAnimator = ValueAnimator.ofFloat();
@@ -403,7 +445,11 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     
     public Bundle onSaveInstanceState(@Nullable Bundle savedState){
         if (savedState == null) savedState = Bundle.EMPTY;
+<<<<<<< HEAD
+        savedState.putBoolean(KEY_DIRECTION, downToUp);
+=======
         savedState.putInt(KEY_START_GRAVITY, startGravity);
+>>>>>>> 27623c72a0ff89584bce873f02e56feb11179750
         savedState.putBoolean(KEY_DEBUG, debug);
         savedState.putFloat(KEY_TOUCHABLE_AREA, touchableArea / density);
         savedState.putParcelable(KEY_STATE, currentState);
@@ -414,6 +460,12 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+<<<<<<< HEAD
+        if (downToUp)
+            return onTouchDownToUp(event);
+        else
+            return onTouchUpToDown(event);
+=======
         if (isAnimationRunning()) return false;
         switch (startGravity){
             case TOP:
@@ -428,6 +480,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
                 e("onTouchListener", "(onTouch)", "You are using not supportable gravity");
                 return false;
         }
+>>>>>>> 27623c72a0ff89584bce873f02e56feb11179750
     }
 
     private boolean onTouchEndToStart(MotionEvent event){
@@ -456,7 +509,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
                 break;
             case MotionEvent.ACTION_UP:
                 float slideAnimationFrom = sliderView.getTranslationX();
-                boolean mustShow = maxSlidePosition > event.getRawX();
+                boolean mustShow = maxSlidePosition > event.getRawY();
                 boolean scrollableAreaConsumed = sliderView.getTranslationX() > sliderView.getWidth() / 5;
 
                 if (scrollableAreaConsumed && !mustShow){
@@ -477,12 +530,10 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         float touchedArea = getEnd() - event.getRawX();
         switch (event.getActionMasked()){
             case MotionEvent.ACTION_DOWN:
-                maxSlidePosition = viewWidth;
                 viewWidth = sliderView.getWidth();
                 startPositionX = event.getRawX();
                 viewStartPositionX = sliderView.getTranslationX();
                 if (touchableArea < touchedArea){
-//                if (touchedArea > viewWidth - touchableArea){
                     canSlide = false;
                 }
                 break;
@@ -501,11 +552,11 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
                 break;
             case MotionEvent.ACTION_UP:
                 float slideAnimationFrom = -sliderView.getTranslationX();
-                boolean mustShow = maxSlidePosition < event.getRawX();
+                boolean mustShow = maxSlidePosition > event.getRawX();
                 boolean scrollableAreaConsumed = sliderView.getTranslationX() < -sliderView.getHeight() / 5;
 
                 if (scrollableAreaConsumed && !mustShow){
-                    slideAnimationTo = sliderView.getWidth();
+                    slideAnimationTo = sliderView.getHeight();
                 }else {
                     slideAnimationTo = 0;
                 }
@@ -563,7 +614,14 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     }
     
     private boolean onTouchUpToDown(MotionEvent event){
+<<<<<<< HEAD
+        float touchedArea = sliderView.getBottom() - event.getRawY();
+        if (isAnimationRunning()){
+            return false;
+        }
+=======
         float touchedArea = event.getRawY() - sliderView.getBottom();
+>>>>>>> 27623c72a0ff89584bce873f02e56feb11179750
         switch (event.getActionMasked()){
             case MotionEvent.ACTION_DOWN:
                 viewHeight = sliderView.getHeight();
@@ -608,6 +666,12 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
 
     @Override
     public void onAnimationUpdate(ValueAnimator animation) {
+<<<<<<< HEAD
+        float val = (float) animation.getAnimatedValue();
+        sliderView.setTranslationY(downToUp ? val : -val);
+        float total = downToUp ? viewHeight : -viewHeight;
+        float percents = (sliderView.getY() - sliderView.getTop()) * 100 / total;
+=======
         float value = (float) animation.getAnimatedValue();
         switch (startGravity){
             case TOP:    onAnimationUpdateUpToDown(value);   break;
@@ -621,6 +685,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         sliderView.setTranslationY(-value);
         float visibleDistance = sliderView.getTop() - sliderView.getY();
         float percents = (visibleDistance) * 100 / viewHeight;
+>>>>>>> 27623c72a0ff89584bce873f02e56feb11179750
         notifyPercentChanged(percents);
     }
 
@@ -728,4 +793,118 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
 
 
 
+<<<<<<< HEAD
+    public static class ListenerAdapter implements Listener {
+        public void onSlide(float percent){}
+        public void onVisibilityChanged(int visibility){}
+    }
+    
+    public static class Builder<T extends View>{
+        private T sliderView;
+        private State startState = HIDDEN;
+        private boolean vectorDownToUp = true;
+        private List<Listener> listeners = new ArrayList<>();
+        private boolean debug = false;
+        private float touchableArea;
+        private int autoSlideDuration = 300;
+        private float density;
+        
+        private Builder(){}
+        
+        public static Builder forView(@NonNull View sliderView){
+            Builder builder = new Builder();
+            builder.sliderView = sliderView;
+            builder.density = sliderView.getResources().getDisplayMetrics().density;
+            builder.touchableArea = 300 * builder.density;
+            return builder;
+        }
+        
+        public Builder withStartState(@NonNull State startState){
+            this.startState = startState;
+            return this;
+        }
+        
+        public Builder withDownToUpVector(boolean downToUp){
+            vectorDownToUp = downToUp;
+            return this;
+        }
+        
+        public Builder withListeners(@NonNull List<Listener> listeners){
+            this.listeners = listeners;
+            return this;
+        }
+        
+        public Builder withListeners(@NonNull Listener... listeners){
+            List<Listener> listeners_list = new ArrayList<>();
+            Collections.addAll(listeners_list, listeners);
+            return withListeners(listeners_list);
+        }
+        
+        public Builder withLoggingEnabled(boolean enable){
+            debug = enable;
+            return this;
+        }
+        
+        public Builder withAutoSlideDuration(int duration){
+            autoSlideDuration = duration;
+            return this;
+        }
+        
+        public Builder withTouchableArea(float area){
+            touchableArea = area * density;
+            return this;
+        }
+        
+        /**
+         * If you want to restore saved params, place this method in end of builder
+         * */
+        public Builder withSavedState(@Nullable Bundle savedState){
+            restoreParams(savedState);
+            return this;
+        }
+        
+        
+        public SlideUp<T> build(){
+            return new SlideUp<>(this);
+        }
+    
+    
+        private void restoreParams(@Nullable Bundle savedState){
+            if (savedState == null) return;
+            if (savedState.getParcelable(KEY_STATE) != null)
+                startState = savedState.getParcelable(KEY_STATE);
+            vectorDownToUp = savedState.getBoolean(KEY_DIRECTION, vectorDownToUp);
+            debug = savedState.getBoolean(KEY_DEBUG, debug);
+            touchableArea = savedState.getFloat(KEY_TOUCHABLE_AREA, touchableArea) * density;
+            autoSlideDuration = savedState.getInt(KEY_AUTO_SLIDE_DURATION, autoSlideDuration);
+        }
+    }
+    
+    public enum State implements Parcelable {
+        HIDDEN, SHOWED;
+    
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(ordinal());
+        }
+    
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+    
+        public static final Creator<State> CREATOR = new Creator<State>() {
+            @Override
+            public State createFromParcel(Parcel in) {
+                return State.values()[in.readInt()];
+            }
+        
+            @Override
+            public State[] newArray(int size) {
+                return new State[size];
+            }
+        };
+    }
+=======
+>>>>>>> 27623c72a0ff89584bce873f02e56feb11179750
 }
