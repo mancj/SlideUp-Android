@@ -1,14 +1,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.slideup.SlideUpViewActivity">
+    tools:context="com.example.slideup.SlideDownViewActivity">
+    <item
+        android:id="@+id/action_slide_up"
+        android:title="@string/slide_up_sample"
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_slide_down"
         android:title="@string/slide_down_sample"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/action_slide_start"
-        android:title="@string/slide_start_sample"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_slide_end"
