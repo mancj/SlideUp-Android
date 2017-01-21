@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -14,10 +15,16 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.DecelerateInterpolator;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static android.view.Gravity.BOTTOM;
+import static android.view.Gravity.END;
+import static android.view.Gravity.START;
+import static android.view.Gravity.TOP;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static com.mancj.slideup.SlideUp.State.HIDDEN;
@@ -25,12 +32,42 @@ import static com.mancj.slideup.SlideUp.State.SHOWED;
 
 public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnimator.AnimatorUpdateListener, Animator.AnimatorListener {
     private final static String TAG = "SlideUp";
-    
-    private final static String KEY_DIRECTION = TAG + "_direction";
+
+    private final static String KEY_START_GRAVITY = TAG + "_start_gravity";
     private final static String KEY_DEBUG = TAG + "_debug";
     private final static String KEY_TOUCHABLE_AREA = TAG + "_touchable_area";
     private final static String KEY_STATE = TAG + "_state";
     private final static String KEY_AUTO_SLIDE_DURATION = TAG + "_auto_slide_duration";
+
+    public enum State implements Parcelable {
+        HIDDEN, SHOWED;
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(ordinal());
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public static final Creator<State> CREATOR = new Creator<State>() {
+            @Override
+            public State createFromParcel(Parcel in) {
+                return State.values()[in.readInt()];
+            }
+
+            @Override
+            public State[] newArray(int size) {
+                return new State[size];
+            }
+        };
+    }
+
+    @IntDef(value = {START, END, TOP, BOTTOM})
+    @Retention(RetentionPolicy.SOURCE)
+    private @interface StartVector{}
     
     private State startState;
     private State currentState;
@@ -43,18 +80,116 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     private float slideAnimationTo;
 
     private float startPositionY;
+    private float startPositionX;
     private float viewStartPositionY;
+    private float viewStartPositionX;
     private boolean canSlide = true;
     private float density;
     private float maxSlidePosition;
     private float viewHeight;
+    private float viewWidth;
 
-    private boolean downToUp = true;
+    private boolean isRTL;
+
+    private int startGravity;
     
     private boolean debug = false;
+
+    public interface Listener {
+        void onSlide(float percent);
+        void onVisibilityChanged(int visibility);
+    }
+
+    public static class ListenerAdapter implements Listener {
+        public void onSlide(float percent){}
+        public void onVisibilityChanged(int visibility){}
+    }
+
+    public static class Builder<T extends View>{
+        private T sliderView;
+        private State startState = HIDDEN;
+        private List<Listener> listeners = new ArrayList<>();
+        private boolean debug = false;
+        private float touchableArea;
+        private int autoSlideDuration = 300;
+        private float density;
+        private int startGravity = BOTTOM;
+        private boolean isRTL;
+
+        private Builder(){}
+
+        public static Builder forView(@NonNull View sliderView){
+            Builder builder = new Builder();
+            builder.sliderView = sliderView;
+            builder.density = sliderView.getResources().getDisplayMetrics().density;
+            builder.isRTL = sliderView.getResources().getBoolean(R.bool.is_right_to_left);
+            builder.touchableArea = 300 * builder.density;
+            return builder;
+        }
+
+        public Builder withStartState(@NonNull State startState){
+            this.startState = startState;
+            return this;
+        }
+
+        public Builder withStartGravity(@StartVector int gravity){
+            startGravity = gravity;
+            return this;
+        }
+
+        public Builder withListeners(@NonNull List<Listener> listeners){
+            this.listeners = listeners;
+            return this;
+        }
+
+        public Builder withListeners(@NonNull Listener... listeners){
+            List<Listener> listeners_list = new ArrayList<>();
+            Collections.addAll(listeners_list, listeners);
+            return withListeners(listeners_list);
+        }
+
+        public Builder withLoggingEnabled(boolean enable){
+            debug = enable;
+            return this;
+        }
+
+        public Builder withAutoSlideDuration(int duration){
+            autoSlideDuration = duration;
+            return this;
+        }
+
+        public Builder withTouchableArea(float area){
+            touchableArea = area * density;
+            return this;
+        }
+
+        /**
+         * If you want to restore saved params, place this method in end of builder
+         * */
+        public Builder withSavedState(@Nullable Bundle savedState){
+            restoreParams(savedState);
+            return this;
+        }
+
+
+        public SlideUp<T> build(){
+            return new SlideUp<>(this);
+        }
+
+
+        private void restoreParams(@Nullable Bundle savedState){
+            if (savedState == null) return;
+            if (savedState.getParcelable(KEY_STATE) != null)
+                startState = savedState.getParcelable(KEY_STATE);
+            startGravity = savedState.getInt(KEY_START_GRAVITY, startGravity);
+            debug = savedState.getBoolean(KEY_DEBUG, debug);
+            touchableArea = savedState.getFloat(KEY_TOUCHABLE_AREA, touchableArea) * density;
+            autoSlideDuration = savedState.getInt(KEY_AUTO_SLIDE_DURATION, autoSlideDuration);
+        }
+    }
     
     private SlideUp(Builder<T> builder){
-        downToUp = builder.vectorDownToUp;
+        startGravity = builder.startGravity;
         listeners = builder.listeners;
         sliderView = builder.sliderView;
         startState = builder.startState;
@@ -62,6 +197,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         touchableArea = builder.touchableArea;
         autoSlideDuration = builder.autoSlideDuration;
         debug = builder.debug;
+        isRTL = builder.isRTL;
         init();
     }
 
@@ -72,7 +208,13 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
             @Override
             public void onGlobalLayout() {
                 viewHeight = sliderView.getHeight();
-                sliderView.setPivotY(downToUp ? 0 : viewHeight);
+                viewWidth = sliderView.getWidth();
+                switch (startGravity){
+                    case TOP:    sliderView.setPivotY(viewHeight); break;
+                    case BOTTOM: sliderView.setPivotY(0);          break;
+                    case START:  sliderView.setPivotX(0);          break;
+                    case END:    sliderView.setPivotX(viewWidth);  break;
+                }
                 updateToCurrentState();
                 ViewTreeObserver observer = sliderView.getViewTreeObserver();
                 if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN) {
@@ -95,22 +237,9 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
                 break;
         }
     }
-    
-    public void setDownToUp(){
-        downToUp = true;
-    }
-
-    public void setUpToDown(){
-        downToUp = false;
-    }
 
     public boolean isVisible(){
         return sliderView.getVisibility() == VISIBLE;
-    }
-
-    @Deprecated
-    public void setSlideListener(@NonNull Listener listener) {
-        listeners.add(listener);
     }
 
     public void addSlideListener(@NonNull Listener listener){
@@ -146,36 +275,123 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     }
 
     public void show(){
-        this.slideAnimationTo = 0;
-        valueAnimator.setFloatValues(viewHeight, slideAnimationTo);
-        valueAnimator.start();
+        show(false);
     }
 
     public void hide(){
-        this.slideAnimationTo = downToUp ? sliderView.getHeight() : -sliderView.getHeight();
-        valueAnimator.setFloatValues(sliderView.getTranslationY(), slideAnimationTo);
-        valueAnimator.start();
+        hide(false);
     }
     
     public void hideImmediately() {
-        if (sliderView.getHeight() > 0){
-            sliderView.setTranslationY(downToUp ? viewHeight : -viewHeight);
-            sliderView.setVisibility(GONE);
-            notifyVisibilityChanged(GONE);
-        }else {
-            startState = HIDDEN;
-        }
+        hide(true);
     }
     
     public void showImmediately() {
-        if (sliderView.getHeight() > 0){
-            sliderView.setTranslationY(0);
-            sliderView.setVisibility(VISIBLE);
-            notifyVisibilityChanged(VISIBLE);
-        }else {
-            startState = SHOWED;
+        show(true);
+    }
+
+    private void hide(boolean immediately) {
+        switch (startGravity){
+            case TOP:
+                if (immediately){
+                    if (sliderView.getHeight() > 0){
+                        sliderView.setTranslationY(viewHeight);
+                        sliderView.setVisibility(GONE);
+                        notifyVisibilityChanged(GONE);
+                    }else {
+                        startState = HIDDEN;
+                    }
+                }else {
+                    this.slideAnimationTo = sliderView.getHeight();
+                    valueAnimator.setFloatValues(sliderView.getTranslationY(), slideAnimationTo);
+                    valueAnimator.start();
+                }
+                break;
+            case BOTTOM:
+                if (immediately){
+                    if (sliderView.getHeight() > 0){
+                        sliderView.setTranslationY(-viewHeight);
+                        sliderView.setVisibility(GONE);
+                        notifyVisibilityChanged(GONE);
+                    }else {
+                        startState = HIDDEN;
+                    }
+                }else {
+                    this.slideAnimationTo = -sliderView.getHeight();
+                    valueAnimator.setFloatValues(sliderView.getTranslationY(), slideAnimationTo);
+                    valueAnimator.start();
+                }
+                break;
+            case START:
+                if (immediately){
+                    if (sliderView.getWidth() > 0){
+                        sliderView.setTranslationX(viewWidth);
+                        sliderView.setVisibility(GONE);
+                        notifyVisibilityChanged(GONE);
+                    }else {
+                        startState = HIDDEN;
+                    }
+                }else {
+                    this.slideAnimationTo = sliderView.getWidth();
+                    valueAnimator.setFloatValues(sliderView.getTranslationX(), slideAnimationTo);
+                    valueAnimator.start();
+                }
+                break;
+            case END:
+                if (immediately){
+                    if (sliderView.getWidth() > 0){
+                        sliderView.setTranslationX(-viewWidth);
+                        sliderView.setVisibility(GONE);
+                        notifyVisibilityChanged(GONE);
+                    }else {
+                        startState = HIDDEN;
+                    }
+                }else {
+                    this.slideAnimationTo = -sliderView.getHeight();
+                    valueAnimator.setFloatValues(sliderView.getTranslationX(), slideAnimationTo);
+                    valueAnimator.start();
+                }
+                break;
         }
     }
+    
+    private void show(boolean immediately){
+        switch (startGravity) {
+            case TOP:
+            case BOTTOM:
+                if (immediately){
+                    if (sliderView.getHeight() > 0){
+                        sliderView.setTranslationY(0);
+                        sliderView.setVisibility(VISIBLE);
+                        notifyVisibilityChanged(VISIBLE);
+                    }else {
+                        startState = SHOWED;
+                    }
+                }else {
+                    this.slideAnimationTo = 0;
+                    valueAnimator.setFloatValues(viewHeight, slideAnimationTo);
+                    valueAnimator.start();
+                }
+                break;
+            case START:
+            case END:
+                if (immediately){
+                    if (sliderView.getWidth() > 0){
+                        sliderView.setTranslationX(0);
+                        sliderView.setVisibility(VISIBLE);
+                        notifyVisibilityChanged(VISIBLE);
+                    }else {
+                        startState = SHOWED;
+                    }
+                }else {
+                    this.slideAnimationTo = 0;
+                    valueAnimator.setFloatValues(viewWidth, slideAnimationTo);
+                    valueAnimator.start();
+                }
+                break;
+        }
+    }
+
 
     private void createAnimation(){
         valueAnimator = ValueAnimator.ofFloat();
@@ -187,7 +403,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     
     public Bundle onSaveInstanceState(@Nullable Bundle savedState){
         if (savedState == null) savedState = Bundle.EMPTY;
-        savedState.putBoolean(KEY_DIRECTION, downToUp);
+        savedState.putInt(KEY_START_GRAVITY, startGravity);
         savedState.putBoolean(KEY_DEBUG, debug);
         savedState.putFloat(KEY_TOUCHABLE_AREA, touchableArea / density);
         savedState.putParcelable(KEY_STATE, currentState);
@@ -198,17 +414,111 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        if (downToUp)
-            return onTouchDownToUp(event);
-        else
-            return onTouchUpToDown(event);
+        if (isAnimationRunning()) return false;
+        switch (startGravity){
+            case TOP:
+                return onTouchUpToDown(event);
+            case BOTTOM:
+                return onTouchDownToUp(event);
+            case START:
+                return onTouchStartToEnd(event);
+            case END:
+                return onTouchEndToStart(event);
+            default:
+                e("onTouchListener", "(onTouch)", "You are using not supportable gravity");
+                return false;
+        }
     }
-    
+
+    private boolean onTouchEndToStart(MotionEvent event){
+        float touchedArea = event.getRawX() - getEnd();
+        switch (event.getActionMasked()){
+            case MotionEvent.ACTION_DOWN:
+                viewWidth = sliderView.getWidth();
+                startPositionX = event.getRawX();
+                viewStartPositionX = sliderView.getTranslationX();
+                if (touchableArea < touchedArea){
+                    canSlide = false;
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                float difference = event.getRawX() - startPositionX;
+                float moveTo = viewStartPositionX + difference;
+                float percents = moveTo * 100 / sliderView.getWidth();
+
+                if (moveTo > 0 && canSlide){
+                    notifyPercentChanged(percents);
+                    sliderView.setTranslationX(moveTo);
+                }
+                if (event.getRawX() > maxSlidePosition) {
+                    maxSlidePosition = event.getRawX();
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                float slideAnimationFrom = sliderView.getTranslationX();
+                boolean mustShow = maxSlidePosition > event.getRawY();
+                boolean scrollableAreaConsumed = sliderView.getTranslationX() > sliderView.getWidth() / 5;
+
+                if (scrollableAreaConsumed && !mustShow){
+                    slideAnimationTo = sliderView.getWidth();
+                }else {
+                    slideAnimationTo = 0;
+                }
+                valueAnimator.setFloatValues(slideAnimationFrom, slideAnimationTo);
+                valueAnimator.start();
+                canSlide = true;
+                maxSlidePosition = 0;
+                break;
+        }
+        return true;
+    }
+
+    private boolean onTouchStartToEnd(MotionEvent event){
+        float touchedArea = getEnd() - event.getRawX();
+        switch (event.getActionMasked()){
+            case MotionEvent.ACTION_DOWN:
+                viewWidth = sliderView.getWidth();
+                startPositionX = event.getRawX();
+                viewStartPositionX = sliderView.getTranslationX();
+                if (touchableArea < touchedArea){
+                    canSlide = false;
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                float difference = event.getRawX() - startPositionX;
+                float moveTo = viewStartPositionX + difference;
+                float percents = moveTo * 100 / -sliderView.getWidth();
+
+                if (moveTo < 0 && canSlide){
+                    notifyPercentChanged(percents);
+                    sliderView.setTranslationX(moveTo);
+                }
+                if (event.getRawX() < maxSlidePosition) {
+                    maxSlidePosition = event.getRawX();
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                float slideAnimationFrom = -sliderView.getTranslationX();
+                boolean mustShow = maxSlidePosition > event.getRawX();
+                boolean scrollableAreaConsumed = sliderView.getTranslationX() < -sliderView.getHeight() / 5;
+
+                if (scrollableAreaConsumed && !mustShow){
+                    slideAnimationTo = sliderView.getHeight();
+                }else {
+                    slideAnimationTo = 0;
+                }
+
+                valueAnimator.setFloatValues(slideAnimationFrom, slideAnimationTo);
+                valueAnimator.start();
+                canSlide = true;
+                maxSlidePosition = 0;
+                break;
+        }
+        return true;
+    }
+
     private boolean onTouchDownToUp(MotionEvent event){
         float touchedArea = event.getRawY() - sliderView.getTop();
-        if (isAnimationRunning()){
-            return false;
-        }
         switch (event.getActionMasked()){
             case MotionEvent.ACTION_DOWN:
                 viewHeight = sliderView.getHeight();
@@ -251,10 +561,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     }
     
     private boolean onTouchUpToDown(MotionEvent event){
-        float touchedArea = sliderView.getBottom() - event.getRawY();
-        if (isAnimationRunning()){
-            return false;
-        }
+        float touchedArea = event.getRawY() - sliderView.getBottom();
         switch (event.getActionMasked()){
             case MotionEvent.ACTION_DOWN:
                 viewHeight = sliderView.getHeight();
@@ -299,11 +606,57 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
 
     @Override
     public void onAnimationUpdate(ValueAnimator animation) {
-        float val = (float) animation.getAnimatedValue();
-        sliderView.setTranslationY(downToUp ? val : -val);
-        float total = downToUp ? viewHeight : -viewHeight;
-        float percents = (sliderView.getY() - sliderView.getTop()) * 100 / total;
+        float value = (float) animation.getAnimatedValue();
+        switch (startGravity){
+            case TOP:    onAnimationUpdateUpToDown(value);   break;
+            case BOTTOM: onAnimationUpdateDownToUp(value);   break;
+            case START:  onAnimationUpdateStartToEnd(value); break;
+            case END:    onAnimationUpdateEndToStart(value); break;
+        }
+    }
+
+    private void onAnimationUpdateUpToDown(float value){
+        sliderView.setTranslationY(-value);
+        float visibleDistance = sliderView.getTop() - sliderView.getY();
+        float percents = (visibleDistance) * 100 / viewHeight;
         notifyPercentChanged(percents);
+    }
+
+    private void onAnimationUpdateDownToUp(float value){
+        sliderView.setTranslationY(value);
+        float visibleDistance = sliderView.getY() - sliderView.getTop();
+        float percents = (visibleDistance) * 100 / viewHeight;
+        notifyPercentChanged(percents);
+    }
+
+    private void onAnimationUpdateStartToEnd(float value){
+        sliderView.setTranslationX(-value);
+        float visibleDistance = sliderView.getX() - getStart();
+        float percents = (visibleDistance) * 100 / -viewWidth;
+        notifyPercentChanged(percents);
+    }
+
+    private void onAnimationUpdateEndToStart(float value){
+        sliderView.setTranslationX(value);
+        float visibleDistance = sliderView.getX() - getStart();
+        float percents = (visibleDistance) * 100 / viewWidth;
+        notifyPercentChanged(percents);
+    }
+
+    private int getStart(){
+        if (isRTL){
+            return sliderView.getRight();
+        }else {
+            return sliderView.getLeft();
+        }
+    }
+
+    private int getEnd(){
+        if (isRTL){
+            return sliderView.getLeft();
+        }else {
+            return sliderView.getRight();
+        }
     }
 
     private void notifyPercentChanged(float percent){
@@ -335,8 +688,8 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
             }
         }
         switch (visibility){
-            case VISIBLE: currentState = SHOWED;
-            case GONE: currentState = HIDDEN;
+            case VISIBLE: currentState = SHOWED; break;
+            case GONE:    currentState = HIDDEN; break;
         }
     }
 
@@ -369,121 +722,8 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         if (debug)
             Log.d(TAG, String.format("%1$-15s %2$-23s %3$s", listener, method, value));
     }
+    
 
-    public interface Listener {
-        void onSlide(float percent);
-        void onVisibilityChanged(int visibility);
-    }
 
-    public static class ListenerAdapter implements Listener {
-        public void onSlide(float percent){}
-        public void onVisibilityChanged(int visibility){}
-    }
-    
-    public static class Builder<T extends View>{
-        private T sliderView;
-        private State startState = HIDDEN;
-        private boolean vectorDownToUp = true;
-        private List<Listener> listeners = new ArrayList<>();
-        private boolean debug = false;
-        private float touchableArea;
-        private int autoSlideDuration = 300;
-        private float density;
-        
-        private Builder(){}
-        
-        public static Builder forView(@NonNull View sliderView){
-            Builder builder = new Builder();
-            builder.sliderView = sliderView;
-            builder.density = sliderView.getResources().getDisplayMetrics().density;
-            builder.touchableArea = 300 * builder.density;
-            return builder;
-        }
-        
-        public Builder withStartState(@NonNull State startState){
-            this.startState = startState;
-            return this;
-        }
-        
-        public Builder withDownToUpVector(boolean downToUp){
-            vectorDownToUp = downToUp;
-            return this;
-        }
-        
-        public Builder withListeners(@NonNull List<Listener> listeners){
-            this.listeners = listeners;
-            return this;
-        }
-        
-        public Builder withListeners(@NonNull Listener... listeners){
-            List<Listener> listeners_list = new ArrayList<>();
-            Collections.addAll(listeners_list, listeners);
-            return withListeners(listeners_list);
-        }
-        
-        public Builder withLoggingEnabled(boolean enable){
-            debug = enable;
-            return this;
-        }
-        
-        public Builder withAutoSlideDuration(int duration){
-            autoSlideDuration = duration;
-            return this;
-        }
-        
-        public Builder withTouchableArea(float area){
-            touchableArea = area * density;
-            return this;
-        }
-        
-        /**
-         * If you want to restore saved params, place this method in end of builder
-         * */
-        public Builder withSavedState(@Nullable Bundle savedState){
-            restoreParams(savedState);
-            return this;
-        }
-        
-        
-        public SlideUp<T> build(){
-            return new SlideUp<>(this);
-        }
-    
-    
-        private void restoreParams(@Nullable Bundle savedState){
-            if (savedState == null) return;
-            if (savedState.getParcelable(KEY_STATE) != null)
-                startState = savedState.getParcelable(KEY_STATE);
-            vectorDownToUp = savedState.getBoolean(KEY_DIRECTION, vectorDownToUp);
-            debug = savedState.getBoolean(KEY_DEBUG, debug);
-            touchableArea = savedState.getFloat(KEY_TOUCHABLE_AREA, touchableArea) * density;
-            autoSlideDuration = savedState.getInt(KEY_AUTO_SLIDE_DURATION, autoSlideDuration);
-        }
-    }
-    
-    public enum State implements Parcelable {
-        HIDDEN, SHOWED;
-    
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(ordinal());
-        }
-    
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-    
-        public static final Creator<State> CREATOR = new Creator<State>() {
-            @Override
-            public State createFromParcel(Parcel in) {
-                return State.values()[in.readInt()];
-            }
-        
-            @Override
-            public State[] newArray(int size) {
-                return new State[size];
-            }
-        };
-    }
+
 }
