@@ -456,7 +456,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
                 break;
             case MotionEvent.ACTION_UP:
                 float slideAnimationFrom = sliderView.getTranslationX();
-                boolean mustShow = maxSlidePosition > event.getRawY();
+                boolean mustShow = maxSlidePosition > event.getRawX();
                 boolean scrollableAreaConsumed = sliderView.getTranslationX() > sliderView.getWidth() / 5;
 
                 if (scrollableAreaConsumed && !mustShow){
@@ -477,10 +477,12 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         float touchedArea = getEnd() - event.getRawX();
         switch (event.getActionMasked()){
             case MotionEvent.ACTION_DOWN:
+                maxSlidePosition = viewWidth;
                 viewWidth = sliderView.getWidth();
                 startPositionX = event.getRawX();
                 viewStartPositionX = sliderView.getTranslationX();
                 if (touchableArea < touchedArea){
+//                if (touchedArea > viewWidth - touchableArea){
                     canSlide = false;
                 }
                 break;
@@ -499,11 +501,11 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
                 break;
             case MotionEvent.ACTION_UP:
                 float slideAnimationFrom = -sliderView.getTranslationX();
-                boolean mustShow = maxSlidePosition > event.getRawX();
+                boolean mustShow = maxSlidePosition < event.getRawX();
                 boolean scrollableAreaConsumed = sliderView.getTranslationX() < -sliderView.getHeight() / 5;
 
                 if (scrollableAreaConsumed && !mustShow){
-                    slideAnimationTo = sliderView.getHeight();
+                    slideAnimationTo = sliderView.getWidth();
                 }else {
                     slideAnimationTo = 0;
                 }
@@ -545,7 +547,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
                 float slideAnimationFrom = sliderView.getTranslationY();
                 boolean mustShow = maxSlidePosition > event.getRawY();
                 boolean scrollableAreaConsumed = sliderView.getTranslationY() > sliderView.getHeight() / 5;
-            
+
                 if (scrollableAreaConsumed && !mustShow){
                     slideAnimationTo = sliderView.getHeight();
                 }else {
@@ -567,6 +569,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
                 viewHeight = sliderView.getHeight();
                 startPositionY = event.getRawY();
                 viewStartPositionY = sliderView.getTranslationY();
+                maxSlidePosition = viewHeight;
                 if (touchableArea < touchedArea){
                     canSlide = false;
                 }
@@ -586,11 +589,11 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
                 break;
             case MotionEvent.ACTION_UP:
                 float slideAnimationFrom = -sliderView.getTranslationY();
-                boolean mustShow = maxSlidePosition > event.getRawY();
+                boolean mustShow = maxSlidePosition < event.getRawY();
                 boolean scrollableAreaConsumed = sliderView.getTranslationY() < -sliderView.getHeight() / 5;
-            
+
                 if (scrollableAreaConsumed && !mustShow){
-                    slideAnimationTo = sliderView.getHeight();
+                    slideAnimationTo = sliderView.getHeight() + sliderView.getTop();
                 }else {
                     slideAnimationTo = 0;
                 }
@@ -659,6 +662,8 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     }
 
     private void notifyPercentChanged(float percent){
+        percent = percent > 100 ? 100 : percent;
+        percent = percent < 0 ? 0 : percent;
         if (!listeners.isEmpty()){
             for (int i = 0; i < listeners.size(); i++) {
                 Listener l = listeners.get(i);

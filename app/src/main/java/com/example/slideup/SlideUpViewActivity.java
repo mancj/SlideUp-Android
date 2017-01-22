@@ -29,20 +29,23 @@ public class SlideUpViewActivity extends AppCompatActivity {
         dim = findViewById(R.id.dim);
         fab = (FloatingActionButton) findViewById(R.id.fab);
 
+
+        SlideUp.Listener slideUpListener = new SlideUp.Listener() {
+            @Override
+            public void onSlide(float percent) {
+                dim.setAlpha(1 - (percent / 100));
+            }
+
+            @Override
+            public void onVisibilityChanged(int visibility) {
+                if (visibility == View.GONE){
+                    fab.show();
+                }
+            }
+        };
+
         slideUp = SlideUp.Builder.forView(slideView)
-                .withListeners(new SlideUp.Listener() {
-                    @Override
-                    public void onSlide(float percent) {
-                        dim.setAlpha(1 - (percent / 100));
-                    }
-    
-                    @Override
-                    public void onVisibilityChanged(int visibility) {
-                        if (visibility == View.GONE){
-                            fab.show();
-                        }
-                    }
-                })
+                .withListeners(slideUpListener)
                 .withStartGravity(Gravity.BOTTOM)
                 .withLoggingEnabled(true)
                 .withStartState(SlideUp.State.HIDDEN)
