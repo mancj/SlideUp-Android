@@ -128,8 +128,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         private float density;
         private int startGravity = BOTTOM;
         private boolean isRTL;
-        private boolean gesturesEnabled;
-
+        private boolean gesturesEnabled = true;
 
         /**
          * <p>Construct a SlideUp by passing the view or his child to use for the generation</p>
@@ -217,7 +216,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
          *
          * @param enabled <b>(default - true)</b>
          * */
-        private Builder withGesturesEnabled(boolean enabled){
+        public Builder withGesturesEnabled(boolean enabled){
             gesturesEnabled = enabled;
             return this;
         }
@@ -561,7 +560,6 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         valueAnimator.addUpdateListener(this);
         valueAnimator.addListener(this);
     }
-
 
     @Override
     public final boolean onTouch(View v, MotionEvent event) {
