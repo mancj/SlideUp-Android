@@ -89,6 +89,8 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     private float viewHeight;
     private float viewWidth;
 
+    private boolean gesturesEnabled;
+
     private boolean isRTL;
 
     private int startGravity;
@@ -96,16 +98,27 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     private boolean debug = false;
 
     public interface Listener {
+
+        /**
+         * @param percent percents of complete slide <b>(100 = HIDDEN, 0 = SHOWED)</b>
+         * */
         void onSlide(float percent);
+
+        /**
+         * @param visibility (<b>GONE</b> or <b>VISIBLE</b>)
+         * */
         void onVisibilityChanged(int visibility);
     }
 
+    /**
+     * <p>Adapter for {@link Listener}. With it you can use all, some single, or none method from Listener</p>
+     * */
     public static class ListenerAdapter implements Listener {
         public void onSlide(float percent){}
         public void onVisibilityChanged(int visibility){}
     }
 
-    public static class Builder<T extends View>{
+    public final static class Builder<T extends View>{
         private T sliderView;
         private State startState = HIDDEN;
         private List<Listener> listeners = new ArrayList<>();
@@ -115,68 +128,122 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         private float density;
         private int startGravity = BOTTOM;
         private boolean isRTL;
+        private boolean gesturesEnabled;
 
-        private Builder(){}
 
-        public static Builder forView(@NonNull View sliderView){
-            Builder builder = new Builder();
-            builder.sliderView = sliderView;
-            builder.density = sliderView.getResources().getDisplayMetrics().density;
-            builder.isRTL = sliderView.getResources().getBoolean(R.bool.is_right_to_left);
-            builder.touchableArea = 300 * builder.density;
-            return builder;
+        /**
+         * <p>Construct a SlideUp by passing the view or his child to use for the generation</p>
+         * */
+        public Builder(@NonNull T sliderView){
+            this.sliderView = sliderView;
+            density = sliderView.getResources().getDisplayMetrics().density;
+            isRTL = sliderView.getResources().getBoolean(R.bool.is_right_to_left);
+            touchableArea = 300 * density;
         }
 
+        /**
+         * <p>Define a start state on screen</p>
+         *
+         * @param startState <b>(default - {@link State#HIDDEN})</b>
+         * */
         public Builder withStartState(@NonNull State startState){
             this.startState = startState;
             return this;
         }
 
+        /**
+         * <p>Define a start gravity, <b>this parameter affects the motion vector slider</b></p>
+         *
+         * @param gravity <b>(default - {@link android.view.Gravity#BOTTOM})</b>
+         * */
         public Builder withStartGravity(@StartVector int gravity){
             startGravity = gravity;
             return this;
         }
 
+        /**
+         * <p>Define a {@link Listener} for this SlideUp</p>
+         *
+         * @param listeners {@link List} of listeners
+         * */
         public Builder withListeners(@NonNull List<Listener> listeners){
             this.listeners = listeners;
             return this;
         }
 
+        /**
+         * <p>Define a {@link Listener} for this SlideUp</p>
+         *
+         * @param listeners array of listeners
+         * */
         public Builder withListeners(@NonNull Listener... listeners){
             List<Listener> listeners_list = new ArrayList<>();
             Collections.addAll(listeners_list, listeners);
             return withListeners(listeners_list);
         }
 
-        public Builder withLoggingEnabled(boolean enable){
-            debug = enable;
+        /**
+         * <p>Turning on/off debug logging for all handled events</p>
+         *
+         * @param enabled <b>(default - false)</b>
+         * */
+        public Builder withLoggingEnabled(boolean enabled){
+            debug = enabled;
             return this;
         }
 
+        /**
+         * <p>Define duration of animation (when you using {@link #hide()} or {@link #show()} methods)</p>
+         *
+         * @param duration <b>(default - 300)</b>
+         * */
         public Builder withAutoSlideDuration(int duration){
             autoSlideDuration = duration;
             return this;
         }
 
+        /**
+         * <p>Define touchable area <b>(in dp)</b> for interaction</p>
+         *
+         * @param area <b>(default - 300dp)</b>
+         * */
         public Builder withTouchableArea(float area){
             touchableArea = area * density;
             return this;
         }
 
         /**
-         * If you want to restore saved params, place this method in end of builder
+         * <p>Turning on/off sliding on touch event</p>
+         *
+         * @param enabled <b>(default - true)</b>
+         * */
+        private Builder withGesturesEnabled(boolean enabled){
+            gesturesEnabled = enabled;
+            return this;
+        }
+
+        /**
+         * <p>
+         * <b>WARNING:</b>
+         * If you want to restore saved parameters, place this method at the end of builder
+         * </p>
+         * @param savedState parameters will be restored from this bundle, if it contains them
          * */
         public Builder withSavedState(@Nullable Bundle savedState){
             restoreParams(savedState);
             return this;
         }
 
-
+        /**
+         * <p>Build the SlideUp and add behavior to view</p>
+         * */
         public SlideUp<T> build(){
             return new SlideUp<>(this);
         }
 
-
+        /**
+         * <p>Trying to restore saved state</p>
+         * */
         private void restoreParams(@Nullable Bundle savedState){
             if (savedState == null) return;
             if (savedState.getParcelable(KEY_STATE) != null)
@@ -196,8 +263,9 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         density = builder.density;
         touchableArea = builder.touchableArea;
         autoSlideDuration = builder.autoSlideDuration;
-        debug = builder.debug;
+        debug = BuildConfig.DEBUG && builder.debug;
         isRTL = builder.isRTL;
+        gesturesEnabled = builder.gesturesEnabled;
         init();
     }
 
@@ -226,7 +294,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         });
         updateToCurrentState();
     }
-    
+
     private void updateToCurrentState() {
         switch (startState){
             case HIDDEN:
@@ -238,56 +306,150 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         }
     }
 
+    /**
+     * <p>Returns the visibility status for this view.</p>
+     *
+     * @return true if view have status {@link View#VISIBLE}
+     */
     public boolean isVisible(){
         return sliderView.getVisibility() == VISIBLE;
     }
 
+    /**
+     * <p>Add Listener which will be used in combination with this SlideUp</p>
+     * */
     public void addSlideListener(@NonNull Listener listener){
         listeners.add(listener);
     }
 
+    /**
+     * <p>Remove Listener which was used in combination with this SlideUp</p>
+     * */
     public void removeSlideListener(@NonNull Listener listener){
         listeners.remove(listener);
     }
 
+    /**
+     * <p>Returns typed view which was used as slider</p>
+     * */
     public T getSliderView() {
         return sliderView;
     }
 
+    /**
+     * <p>Set duration of animation (when you using {@link #hide()} or {@link #show()} methods)</p>
+     *
+     * @param autoSlideDuration <b>(default - 300)</b>
+     * */
     public void setAutoSlideDuration(int autoSlideDuration) {
         this.autoSlideDuration = autoSlideDuration;
     }
 
+    /**
+     * <p>Returns duration of animation (when you using {@link #hide()} or {@link #show()} methods)</p>
+     * */
     public float getAutoSlideDuration(){
         return this.autoSlideDuration;
     }
 
+    /**
+     * <p>Set touchable area <b>(in dp)</b> for interaction</p>
+     *
+     * @param touchableArea <b>(default - 300dp)</b>
+     * */
     public void setTouchableArea(float touchableArea) {
         this.touchableArea = touchableArea * density;
     }
 
+    /**
+     * <p>Returns touchable area <b>(in dp)</b> for interaction</p>
+     * */
     public float getTouchableArea() {
         return this.touchableArea / density;
     }
 
+    /**
+     * <p>Returns running status of animation</p>
+     *
+     * @return true if animation is running
+     * */
     public boolean isAnimationRunning(){
         return valueAnimator != null && valueAnimator.isRunning();
     }
 
+    /**
+     * <p>Show view with animation</p>
+     * */
     public void show(){
         show(false);
     }
 
+    /**
+     * <p>Hide view with animation</p>
+     * */
     public void hide(){
         hide(false);
     }
-    
+
+    /**
+     * <p>Hide view without animation</p>
+     * */
     public void hideImmediately() {
         hide(true);
     }
-    
+
+    /**
+     * <p>Show view without animation</p>
+     * */
     public void showImmediately() {
         show(true);
+    }
+
+    /**
+     * <p>Turning on/off debug logging</p>
+     *
+     * @param enabled <b>(default - false)</b>
+     * */
+    public void setLoggingEnabled(boolean enabled){
+        debug = BuildConfig.DEBUG && enabled;
+    }
+
+    /**
+     * <p>Returns current status of debug logging</p>
+     * */
+    public boolean isLoggingEnabled(){
+        return debug;
+    }
+
+    /**
+     * <p>Turning on/off gestures</p>
+     *
+     * @param enabled <b>(default - true)</b>
+     * */
+    public void setGesturesEnabled(boolean enabled) {
+        this.gesturesEnabled = gesturesEnabled;
+    }
+
+    /**
+     * <p>Returns current status of gestures</p>
+     * */
+    public boolean isGesturesEnabled() {
+        return gesturesEnabled;
+    }
+
+    /**
+     * <p>Saving current state of SlideUp</p>
+     *
+     * @return {@link Bundle} with saved state of SlideUp
+     * */
+    public Bundle onSaveInstanceState(@Nullable Bundle savedState){
+        if (savedState == null) savedState = Bundle.EMPTY;
+        savedState.putInt(KEY_START_GRAVITY, startGravity);
+        savedState.putBoolean(KEY_DEBUG, debug);
+        savedState.putFloat(KEY_TOUCHABLE_AREA, touchableArea / density);
+        savedState.putParcelable(KEY_STATE, currentState);
+        savedState.putInt(KEY_AUTO_SLIDE_DURATION, autoSlideDuration);
+        return savedState;
     }
 
     private void hide(boolean immediately) {
@@ -392,7 +554,6 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         }
     }
 
-
     private void createAnimation(){
         valueAnimator = ValueAnimator.ofFloat();
         valueAnimator.setDuration(autoSlideDuration);
@@ -400,20 +561,11 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         valueAnimator.addUpdateListener(this);
         valueAnimator.addListener(this);
     }
-    
-    public Bundle onSaveInstanceState(@Nullable Bundle savedState){
-        if (savedState == null) savedState = Bundle.EMPTY;
-        savedState.putInt(KEY_START_GRAVITY, startGravity);
-        savedState.putBoolean(KEY_DEBUG, debug);
-        savedState.putFloat(KEY_TOUCHABLE_AREA, touchableArea / density);
-        savedState.putParcelable(KEY_STATE, currentState);
-        savedState.putInt(KEY_AUTO_SLIDE_DURATION, autoSlideDuration);
-        return savedState;
-    }
-    
+
 
     @Override
-    public boolean onTouch(View v, MotionEvent event) {
+    public final boolean onTouch(View v, MotionEvent event) {
+        if (!gesturesEnabled) return false;
         if (isAnimationRunning()) return false;
         switch (startGravity){
             case TOP:
@@ -607,7 +759,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     }
 
     @Override
-    public void onAnimationUpdate(ValueAnimator animation) {
+    public final void onAnimationUpdate(ValueAnimator animation) {
         float value = (float) animation.getAnimatedValue();
         switch (startGravity){
             case TOP:    onAnimationUpdateUpToDown(value);   break;
@@ -664,7 +816,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     private void notifyPercentChanged(float percent){
         percent = percent > 100 ? 100 : percent;
         percent = percent < 0 ? 0 : percent;
-        if (!listeners.isEmpty()){
+        if (listeners != null && !listeners.isEmpty()){
             for (int i = 0; i < listeners.size(); i++) {
                 Listener l = listeners.get(i);
                 if (l != null){
@@ -678,7 +830,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     }
 
     private void notifyVisibilityChanged(int visibility){
-        if (!listeners.isEmpty()){
+        if (listeners != null && !listeners.isEmpty()){
             for (int i = 0; i < listeners.size(); i++) {
                 Listener l = listeners.get(i);
                 if (l != null) {
@@ -696,13 +848,13 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     }
 
     @Override
-    public void onAnimationStart(Animator animator) {
+    public final void onAnimationStart(Animator animator) {
         sliderView.setVisibility(VISIBLE);
         notifyVisibilityChanged(VISIBLE);
     }
 
     @Override
-    public void onAnimationEnd(Animator animator) {
+    public final void onAnimationEnd(Animator animator) {
         if (slideAnimationTo != 0){
             sliderView.setVisibility(GONE);
             notifyVisibilityChanged(GONE);
@@ -710,10 +862,10 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     }
 
     @Override
-    public void onAnimationCancel(Animator animator) {}
+    public final void onAnimationCancel(Animator animator) {}
 
     @Override
-    public void onAnimationRepeat(Animator animator) {}
+    public final void onAnimationRepeat(Animator animator) {}
     
     private void e(String listener, String method, String message){
         if (debug)
@@ -724,8 +876,4 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         if (debug)
             Log.d(TAG, String.format("%1$-15s %2$-23s %3$s", listener, method, value));
     }
-    
-
-
-
 }

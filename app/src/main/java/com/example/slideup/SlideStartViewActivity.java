@@ -29,7 +29,7 @@ public class SlideStartViewActivity extends AppCompatActivity {
         dim = findViewById(R.id.dim);
         fab = (FloatingActionButton) findViewById(R.id.fab);
 
-        slideUp = SlideUp.Builder.forView(slideView)
+        slideUp = new SlideUp.Builder<>(slideView)
                 .withListeners(new SlideUp.Listener() {
                     @Override
                     public void onSlide(float percent) {
