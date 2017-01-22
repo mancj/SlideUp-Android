@@ -5,8 +5,8 @@ SlideUp is a small library that allows you to add sweet slide effect to any view
 
 ---
 
-<img src="/art/art1.gif" width="300"> 
-<img src="/art/art2.gif" width="300"> 
+<img src="/art/art1.gif" width="300">
+<img src="/art/art2.gif" width="300">
 
 ---
 # Usage
@@ -50,7 +50,7 @@ View slideView = findViewById(R.id.slideView);
 ### Step 3:
 Create a SlideUp object and pass in your view
 ```java
-slideUp = SlideUp.Builder
+slideUp = new SlideUp.Builder<>(slideView)
                 .forView(slideView)
                 .withStartState(SlideUp.State.HIDDEN)
                 .withStartGravity(Gravity.BOTTOM)
@@ -66,26 +66,24 @@ dim = findViewById(R.id.dim);
 fab = (FloatingActionButton) findViewById(R.id.fab);
 
 
-SlideUp.Listener slideUpListener = new SlideUp.Listener() {
-    @Override
-    public void onSlide(float percent) {
-        dim.setAlpha(1 - (percent / 100));
-    }
+slideUp = new SlideUp.Builder<>(slideView)
+         .withListeners(new SlideUp.Listener() {
+             @Override
+             public void onSlide(float percent) {
+                 dim.setAlpha(1 - (percent / 100));
+             }
 
-    @Override
-    public void onVisibilityChanged(int visibility) {
-        if (visibility == View.GONE){
-            fab.show();
-        }
-    }
-};
-
-slideUp = SlideUp.Builder.forView(slideView)
-              .withListeners(slideUpListener)
-              .withStartGravity(Gravity.BOTTOM)
-              .withLoggingEnabled(true)
-              .withStartState(SlideUp.State.HIDDEN)
-              .build();
+             @Override
+             public void onVisibilityChanged(int visibility) {
+                 if (visibility == View.GONE){
+                     fab.show();
+                 }
+             }
+         })
+         .withStartGravity(Gravity.TOP)
+         .withLoggingEnabled(true)
+         .withStartState(SlideUp.State.HIDDEN)
+         .build();
 
 fab.setOnClickListener(new View.OnClickListener() {
     @Override
