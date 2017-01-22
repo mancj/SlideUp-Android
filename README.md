@@ -51,7 +51,6 @@ View slideView = findViewById(R.id.slideView);
 Create a SlideUp object and pass in your view
 ```java
 slideUp = new SlideUp.Builder<>(slideView)
-                .forView(slideView)
                 .withStartState(SlideUp.State.HIDDEN)
                 .withStartGravity(Gravity.BOTTOM)
                 .build();
