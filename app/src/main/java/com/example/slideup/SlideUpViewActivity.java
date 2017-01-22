@@ -44,7 +44,7 @@ public class SlideUpViewActivity extends AppCompatActivity {
             }
         };
 
-        slideUp = SlideUp.Builder.forView(slideView)
+        slideUp = new SlideUp.Builder<>(slideView)
                 .withListeners(slideUpListener)
                 .withStartGravity(Gravity.BOTTOM)
                 .withLoggingEnabled(true)
