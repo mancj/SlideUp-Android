@@ -262,7 +262,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         density = builder.density;
         touchableArea = builder.touchableArea;
         autoSlideDuration = builder.autoSlideDuration;
-        debug = BuildConfig.DEBUG && builder.debug;
+        debug = builder.debug;
         isRTL = builder.isRTL;
         gesturesEnabled = builder.gesturesEnabled;
         init();
@@ -410,7 +410,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
      * @param enabled <b>(default - false)</b>
      * */
     public void setLoggingEnabled(boolean enabled){
-        debug = BuildConfig.DEBUG && enabled;
+        debug = enabled;
     }
 
     /**
