@@ -143,7 +143,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         /**
          * <p>Define a start state on screen</p>
          *
-         * @param startState <b>(default - <b color="#FFEE58">{@link State#HIDDEN})</b>
+         * @param startState <b>(default - <b color="#FFEE58">{@link State#HIDDEN}</b>)</b>
          * */
         public Builder withStartState(@NonNull State startState){
             this.startState = startState;
@@ -153,7 +153,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         /**
          * <p>Define a start gravity, <b>this parameter affects the motion vector slider</b></p>
          *
-         * @param gravity <b>(default - <b color="#FFEE58">{@link android.view.Gravity#BOTTOM})</b>
+         * @param gravity <b>(default - <b color="#FFEE58">{@link android.view.Gravity#BOTTOM}</b>)</b>
          * */
         public Builder withStartGravity(@StartVector int gravity){
             startGravity = gravity;
