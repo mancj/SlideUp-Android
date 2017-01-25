@@ -123,7 +123,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     public interface Listener {
 
         /**
-         * @param percent percents of complete slide <b color="#FFEE58">(100 = HIDDEN, 0 = SHOWED)</b>
+         * @param percent percents of complete slide <b color="#EF6C00">(100 = HIDDEN, 0 = SHOWED)</b>
          * */
         void onSlide(float percent);
 
@@ -170,7 +170,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         /**
          * <p>Define a start state on screen</p>
          *
-         * @param startState <b>(default - <b color="#FFEE58">{@link State#HIDDEN}</b>)</b>
+         * @param startState <b>(default - <b color="#EF6C00">{@link State#HIDDEN}</b>)</b>
          * */
         public Builder withStartState(@NonNull State startState){
             this.startState = startState;
@@ -180,7 +180,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         /**
          * <p>Define a start gravity, <b>this parameter affects the motion vector slider</b></p>
          *
-         * @param gravity <b>(default - <b color="#FFEE58">{@link android.view.Gravity#BOTTOM}</b>)</b>
+         * @param gravity <b>(default - <b color="#EF6C00">{@link android.view.Gravity#BOTTOM}</b>)</b>
          * */
         public Builder withStartGravity(@StartVector int gravity){
             startGravity = gravity;
@@ -211,7 +211,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         /**
          * <p>Turning on/off debug logging for all handled events</p>
          *
-         * @param enabled <b>(default - <b color="#FFEE58">false</b>)</b>
+         * @param enabled <b>(default - <b color="#EF6C00">false</b>)</b>
          * */
         public Builder withLoggingEnabled(boolean enabled){
             debug = enabled;
@@ -221,7 +221,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         /**
          * <p>Define duration of animation (whenever you use {@link #hide()} or {@link #show()} methods)</p>
          *
-         * @param duration <b>(default - <b color="#FFEE58">300</b>)</b>
+         * @param duration <b>(default - <b color="#EF6C00">300</b>)</b>
          * */
         public Builder withAutoSlideDuration(int duration){
             autoSlideDuration = duration;
@@ -231,7 +231,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         /**
          * <p>Define touchable area <b>(in dp)</b> for interaction</p>
          *
-         * @param area <b>(default - <b color="#FFEE58">300dp</b>)</b>
+         * @param area <b>(default - <b color="#EF6C00">300dp</b>)</b>
          * */
         public Builder withTouchableArea(float area){
             touchableArea = area * density;
@@ -241,7 +241,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         /**
          * <p>Turning on/off sliding on touch event</p>
          *
-         * @param enabled <b>(default - <b color="#FFEE58">true</b>)</b>
+         * @param enabled <b>(default - <b color="#EF6C00">true</b>)</b>
          * */
         public Builder withGesturesEnabled(boolean enabled){
             gesturesEnabled = enabled;
@@ -251,7 +251,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         /**
          * <p>Define behavior of soft input</p>
          *
-         * @param hide <b>(default - <b color="#FFEE58">false</b>)</b>
+         * @param hide <b>(default - <b color="#EF6C00">false</b>)</b>
          * */
         public Builder withHideSoftInputWhenDisplayed(boolean hide){
             hideKeyboard = hide;
@@ -261,7 +261,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         /**
          * <p>Define interpolator for animation (whenever you use {@link #hide()} or {@link #show()} methods)</p>
          *
-         * @param interpolator <b>(default - <b color="#FFEE58">Decelerate interpolator</b>)</b>
+         * @param interpolator <b>(default - <b color="#EF6C00">Decelerate interpolator</b>)</b>
          * */
         public Builder withInterpolator(TimeInterpolator interpolator){
             this.interpolator = interpolator;
@@ -270,7 +270,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         
         /**
          * <p>
-         * <b color="#FFEE58">IMPORTANT:</b>
+         * <b color="#EF6C00">IMPORTANT:</b>
          * If you want to restore saved parameters, place this method at the end of builder
          * </p>
          * @param savedState parameters will be restored from this bundle, if it contains them
@@ -408,7 +408,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     /**
      * <p>Set duration of animation (whenever you use {@link #hide()} or {@link #show()} methods)</p>
      *
-     * @param autoSlideDuration <b>(default - <b color="#FFEE58">300</b>)</b>
+     * @param autoSlideDuration <b>(default - <b color="#EF6C00">300</b>)</b>
      * */
     public void setAutoSlideDuration(int autoSlideDuration) {
         this.autoSlideDuration = autoSlideDuration;
@@ -424,7 +424,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     /**
      * <p>Set touchable area <b>(in dp)</b> for interaction</p>
      *
-     * @param touchableArea <b>(default - <b color="#FFEE58">300dp</b>)</b>
+     * @param touchableArea <b>(default - <b color="#EF6C00">300dp</b>)</b>
      * */
     public void setTouchableArea(float touchableArea) {
         this.touchableArea = touchableArea * density;
@@ -477,7 +477,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     /**
      * <p>Turning on/off debug logging</p>
      *
-     * @param enabled <b>(default - <b color="#FFEE58">false</b>)</b>
+     * @param enabled <b>(default - <b color="#EF6C00">false</b>)</b>
      * */
     public void setLoggingEnabled(boolean enabled){
         debug = enabled;
@@ -493,7 +493,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     /**
      * <p>Turning on/off gestures</p>
      *
-     * @param enabled <b>(default - <b color="#FFEE58">true</b>)</b>
+     * @param enabled <b>(default - <b color="#EF6C00">true</b>)</b>
      * */
     public void setGesturesEnabled(boolean enabled) {
         this.gesturesEnabled = enabled;
@@ -524,7 +524,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     /**
      * <p>Sets interpolator for animation (whenever you use {@link #hide()} or {@link #show()} methods)</p>
      *
-     * @param interpolator <b>(default - <b color="#FFEE58">DecelerateInterpolator</b>)</b>
+     * @param interpolator <b>(default - <b color="#EF6C00">Decelerate interpolator</b>)</b>
      * */
     public void setInterpolator(TimeInterpolator interpolator) {
         valueAnimator.setInterpolator(this.interpolator = interpolator);
@@ -540,7 +540,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     /**
      * <p>Sets behavior of soft input</p>
      *
-     * @param hide <b>(default - <b color="#FFEE58">false</b>)</b>
+     * @param hide <b>(default - <b color="#EF6C00">false</b>)</b>
      * */
     public void setHideKeyboardWhenDisplayed(boolean hide) {
         hideKeyboard = hide;
