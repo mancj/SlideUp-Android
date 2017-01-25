@@ -2,8 +2,10 @@ package com.mancj.slideup;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
+import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.IntDef;
@@ -14,6 +16,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.DecelerateInterpolator;
+import android.view.inputmethod.InputMethodManager;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -88,6 +91,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     private float maxSlidePosition;
     private float viewHeight;
     private float viewWidth;
+    private boolean hideKeyboard = false;
 
     private boolean gesturesEnabled;
 
@@ -129,6 +133,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         private int startGravity = BOTTOM;
         private boolean isRTL;
         private boolean gesturesEnabled = true;
+        private boolean hideKeyboard = false;
 
         /**
          * <p>Construct a SlideUp by passing the view or his child to use for the generation</p>
@@ -222,6 +227,16 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         }
 
         /**
+         * <p>Define behavior of soft input</p>
+         *
+         * @param hide <b>(default - <b color="#FFEE58">false</b>)</b>
+         * */
+        public Builder withHideSoftInputOnShown(boolean hide){
+            hideKeyboard = hide;
+            return this;
+        }
+        
+        /**
          * <p>
          * <b color="#FFEE58">WARNING:</b>
          * If you want to restore saved parameters, place this method at the end of builder
@@ -254,6 +269,25 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         }
     }
     
+    
+    /**
+     * <p>Trying to hide soft input from window</p>
+     * @see InputMethodManager#hideSoftInputFromWindow(IBinder, int)
+     * */
+    public void hideSoftInput(){
+        ((InputMethodManager) sliderView.getContext().getSystemService(Context.INPUT_METHOD_SERVICE))
+                .hideSoftInputFromWindow(sliderView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+    }
+    
+    /**
+     * <p>Trying to show soft input to window</p>
+     * @see InputMethodManager#showSoftInput(View, int)
+     * */
+    public void showSoftInput(){
+        ((InputMethodManager) sliderView.getContext().getSystemService(Context.INPUT_METHOD_SERVICE))
+                .showSoftInput(sliderView, 0);
+    }
+    
     private SlideUp(Builder<T> builder){
         startGravity = builder.startGravity;
         listeners = builder.listeners;
@@ -265,6 +299,7 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
         debug = builder.debug;
         isRTL = builder.isRTL;
         gesturesEnabled = builder.gesturesEnabled;
+        hideKeyboard = builder.hideKeyboard;
         init();
     }
 
@@ -814,6 +849,8 @@ public class SlideUp<T extends View> implements View.OnTouchListener, ValueAnima
     private void notifyPercentChanged(float percent){
         percent = percent > 100 ? 100 : percent;
         percent = percent < 0 ? 0 : percent;
+        if (slideAnimationTo == 0 && hideKeyboard)
+            hideSoftInput();
         if (listeners != null && !listeners.isEmpty()){
             for (int i = 0; i < listeners.size(); i++) {
                 Listener l = listeners.get(i);
