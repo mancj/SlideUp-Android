@@ -15,7 +15,7 @@ import com.mancj.slideup.SlideUp;
 public class SlideDownViewActivity extends AppCompatActivity {
     private SlideUp slideUp;
     private View dim;
-    private View slideView;
+    private View sliderView;
     private FloatingActionButton fab;
 
     @Override
@@ -25,11 +25,11 @@ public class SlideDownViewActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        slideView = findViewById(R.id.slideView);
+        sliderView = findViewById(R.id.slideView);
         dim = findViewById(R.id.dim);
         fab = (FloatingActionButton) findViewById(R.id.fab);
 
-        slideUp = new SlideUp.Builder<>(slideView)
+        slideUp = new SlideUp.Builder(sliderView)
                 .withListeners(new SlideUp.Listener() {
                     @Override
                     public void onSlide(float percent) {
