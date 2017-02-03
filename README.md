@@ -1,5 +1,5 @@
 # SlideUp-Android
-SlideUp is a small library that allows you to add sweet slide effect to any view.
+SlideUp is a small library that allows you to add sweet slide effect to any view. Slide your views up, down, left or right with SlideUp!
 
 [![Release](https://jitpack.io/v/mancj/SlideUp-Android.svg)](https://jitpack.io/#mancj/SlideUp-Android)
 
