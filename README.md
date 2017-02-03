@@ -50,7 +50,7 @@ View slideView = findViewById(R.id.slideView);
 ### Step 3:
 Create a SlideUp object and pass in your view
 ```java
-slideUp = new SlideUp.Builder<>(slideView)
+slideUp = new SlideUp.Builder(slideView)
                 .withStartState(SlideUp.State.HIDDEN)
                 .withStartGravity(Gravity.BOTTOM)
                 .build();
@@ -65,7 +65,7 @@ dim = findViewById(R.id.dim);
 fab = (FloatingActionButton) findViewById(R.id.fab);
 
 
-slideUp = new SlideUp.Builder<>(slideView)
+slideUp = new SlideUp.Builder(slideView)
          .withListeners(new SlideUp.Listener() {
              @Override
              public void onSlide(float percent) {
