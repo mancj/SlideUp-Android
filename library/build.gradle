@@ -2,15 +2,13 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.1"
+    buildToolsVersion "25.0.2"
 
     defaultConfig {
         minSdkVersion 12
         targetSdkVersion 25
-        versionCode 4
-        versionName "2.1"
-
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        versionCode 5
+        versionName "2.2.1"
 
     }
     buildTypes {
@@ -19,12 +17,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-}
-
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:25.1.0'
-    testCompile 'junit:junit:4.12'
 }
 
 // build a jar with source files
