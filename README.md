@@ -3,8 +3,8 @@ SlideUp is a small library that allows you to add sweet slide effect to any view
 
 ---
 
-<img src="/art/art1.gif" width="300">
-<img src="/art/art2.gif" width="300">
+<img src="https://github.com/mancj/mancj.github.io/blob/master/other/slideup-art/art1.gif" width="300">
+<img src="https://github.com/mancj/mancj.github.io/blob/master/other/slideup-art/art2.gif" width="300">
 
 ---
 # Usage
