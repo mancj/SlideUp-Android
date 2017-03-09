@@ -840,9 +840,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 viewHeight = sliderView.getHeight();
                 startPositionY = event.getRawY();
                 viewStartPositionY = sliderView.getTranslationY();
-                if (touchableArea < touchedArea){
-                    canSlide = false;
-                }
+                canSlide = touchableArea >= touchedArea;
                 break;
             case MotionEvent.ACTION_MOVE:
                 float difference = event.getRawY() - startPositionY;
@@ -989,7 +987,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                     l.onSlide(percent);
                     d("Listener(" + i + ")", "(onSlide)", "value = " + percent);
                 }else {
-                    e("Listener(" + i + ")", "(onSlide)", "Listener is null, skip notify for him...");
+                    e("Listener(" + i + ")", "(onSlide)", "Listener is null, skip notification...");
                 }
             }
         }
