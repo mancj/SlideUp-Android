@@ -840,9 +840,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 viewHeight = sliderView.getHeight();
                 startPositionY = event.getRawY();
                 viewStartPositionY = sliderView.getTranslationY();
-                if (touchableArea < touchedArea){
-                    canSlide = false;
-                }
+                canSlide = touchableArea >= touchedArea;
                 break;
             case MotionEvent.ACTION_MOVE:
                 float difference = event.getRawY() - startPositionY;
