@@ -23,7 +23,7 @@ allprojects {
 Add the dependency
 ```groovy
 dependencies {
-    compile 'com.github.mancj:SlideUp-Android:2.2.1'
+    compile 'com.github.mancj:SlideUp-Android:2.2.3'
 }
 ```
 
