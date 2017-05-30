@@ -4,8 +4,7 @@ SlideUp is a small library that allows you to add sweet slide effect to any view
 [![Release](https://jitpack.io/v/mancj/SlideUp-Android.svg)](https://jitpack.io/#mancj/SlideUp-Android)
 ---
 
-<img src="https://github.com/mancj/mancj.github.io/blob/master/other/slideup-art/art1.gif" width="300">
-<img src="https://github.com/mancj/mancj.github.io/blob/master/other/slideup-art/art2.gif" width="300">
+<img src="https://github.com/mancj/mancj.github.io/blob/master/other/slideup-art/art1.gif" width="300"><img src="https://github.com/mancj/mancj.github.io/blob/master/other/slideup-art/art2.gif" width="300">
 
 ---
 # Usage
@@ -24,7 +23,7 @@ allprojects {
 Add the dependency
 ```groovy
 dependencies {
-    compile 'com.github.mancj:SlideUp-Android:2.2.4'
+    compile 'com.github.mancj:SlideUp-Android:2.2.5'
 }
 ```
 
