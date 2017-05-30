@@ -30,7 +30,7 @@ public class SlideDownViewActivity extends AppCompatActivity {
         fab = (FloatingActionButton) findViewById(R.id.fab);
 
         slideUp = new SlideUp.Builder(sliderView)
-                .withListeners(new SlideUp.Listener() {
+                .withListeners(new SlideUp.Listener.Events() {
                     @Override
                     public void onSlide(float percent) {
                         dim.setAlpha(1 - (percent / 100));
