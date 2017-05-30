@@ -7,8 +7,6 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,7 +17,6 @@ import android.view.ViewTreeObserver;
 import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 
-import java.io.Serializable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -36,7 +33,7 @@ import static com.mancj.slideup.SlideUp.State.HIDDEN;
 import static com.mancj.slideup.SlideUp.State.SHOWED;
 
 public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpdateListener, Animator.AnimatorListener {
-    private final static String TAG = "SlideUp";
+    private final static String TAG = SlideUp.class.getSimpleName();
 
     private final static String KEY_START_GRAVITY = TAG + "_start_gravity";
     private final static String KEY_DEBUG = TAG + "_debug";
@@ -44,11 +41,12 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     private final static String KEY_STATE = TAG + "_state";
     private final static String KEY_AUTO_SLIDE_DURATION = TAG + "_auto_slide_duration";
     private final static String KEY_HIDE_SOFT_INPUT = TAG + "_hide_soft_input";
+    private final static String KEY_STATE_SAVED = TAG + "_state_saved";
     
     /**
      * <p>Available start states</p>
      * */
-    public enum State implements Parcelable, Serializable {
+    public enum State{
         
         /**
          * State hidden is equal {@link View#GONE}
@@ -58,113 +56,94 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
         /**
          * State showed is equal {@link View#VISIBLE}
          * */
-        SHOWED;
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(ordinal());
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        public static final Creator<State> CREATOR = new Creator<State>() {
-            @Override
-            public State createFromParcel(Parcel in) {
-                return State.values()[in.readInt()];
-            }
-
-            @Override
-            public State[] newArray(int size) {
-                return new State[size];
-            }
-        };
+        SHOWED
     }
 
     @IntDef(value = {START, END, TOP, BOTTOM})
     @Retention(RetentionPolicy.SOURCE)
     private @interface StartVector{}
     
-    private State startState;
-    private State currentState;
-    private View sliderView;
-    private float touchableArea;
-    private int autoSlideDuration;
-    private List<Listener> listeners;
+    private State mStartState;
+    private State mCurrentState;
+    private View mSliderView;
+    private float mTouchableArea;
+    private int mAutoSlideDuration;
+    private List<Listener> mListeners;
 
-    private ValueAnimator valueAnimator;
-    private float slideAnimationTo;
+    private ValueAnimator mValueAnimator;
+    private float mSlideAnimationTo;
 
-    private float startPositionY;
-    private float startPositionX;
-    private float viewStartPositionY;
-    private float viewStartPositionX;
-    private boolean canSlide = true;
-    private float density;
-    private float maxSlidePosition;
-    private float viewHeight;
-    private float viewWidth;
-    private boolean hideKeyboard;
-    private TimeInterpolator interpolator;
+    private float mStartPositionY;
+    private float mStartPositionX;
+    private float mViewStartPositionY;
+    private float mViewStartPositionX;
+    private boolean mCanSlide = true;
+    private float mDensity;
+    private float mMaxSlidePosition;
+    private float mViewHeight;
+    private float mViewWidth;
+    private boolean mHideKeyboard;
+    private TimeInterpolator mInterpolator;
 
-    private boolean gesturesEnabled;
+    private boolean mGesturesEnabled;
 
-    private boolean isRTL;
+    private boolean mIsRTL;
     
-    private int startGravity;
+    private int mStartGravity;
     
-    private boolean debug;
+    private boolean mDebug;
 
     /**
      * <p>Interface to listen to all handled events taking place in the slider</p>
      * */
     public interface Listener {
+        
+        interface Slide extends Listener{
+            
+            /**
+             * @param percent percents of complete slide <b color="#EF6C00">(100 = HIDDEN, 0 = SHOWED)</b>
+             * */
+            void onSlide(float percent);
+        }
 
-        /**
-         * @param percent percents of complete slide <b color="#EF6C00">(100 = HIDDEN, 0 = SHOWED)</b>
-         * */
-        void onSlide(float percent);
-
-        /**
-         * @param visibility (<b>GONE</b> or <b>VISIBLE</b>)
-         * */
-        void onVisibilityChanged(int visibility);
+        interface Visibility extends Listener{
+    
+            /**
+             * @param visibility (<b>GONE</b> or <b>VISIBLE</b>)
+             * */
+            void onVisibilityChanged(int visibility);
+        }
+        
+        interface Events extends Visibility, Slide{}
     }
-
-    /**
-     * <p>Adapter for {@link Listener}. With it you can use all, some single, or none method from Listener</p>
-     * */
-    public static class ListenerAdapter implements Listener {
-        public void onSlide(float percent){}
-        public void onVisibilityChanged(int visibility){}
-    }
+    
     /**
      * <p>Default constructor for SlideUp</p>
      * */
     public final static class Builder{
-        private View sliderView;
-        private float density;
-        private float touchableArea;
-        private boolean isRTL;
-        private State startState = HIDDEN;
-        private List<Listener> listeners = new ArrayList<>();
-        private boolean debug = false;
-        private int autoSlideDuration = 300;
-        private int startGravity = BOTTOM;
-        private boolean gesturesEnabled = true;
-        private boolean hideKeyboard = false;
-        private TimeInterpolator interpolator = new DecelerateInterpolator();
+        private boolean mStateRestored = false;
+        
+        private View mSliderView;
+        private float mDensity;
+        private float mTouchableArea;
+        private boolean mIsRTL;
+        private State mStartState = HIDDEN;
+        private List<Listener> mListeners = new ArrayList<>();
+        private boolean mDebug = false;
+        private int mAutoSlideDuration = 300;
+        private int mStartGravity = BOTTOM;
+        private boolean mGesturesEnabled = true;
+        private boolean mHideKeyboard = false;
+        private TimeInterpolator mInterpolator = new DecelerateInterpolator();
 
         /**
          * <p>Construct a SlideUp by passing the view or his child to use for the generation</p>
          * */
         public Builder(@NonNull View sliderView){
-            this.sliderView = sliderView;
-            density = sliderView.getResources().getDisplayMetrics().density;
-            isRTL = sliderView.getResources().getBoolean(R.bool.is_right_to_left);
-            touchableArea = 300 * density;
+            this.mSliderView = sliderView;
+            mDensity = sliderView.getResources().getDisplayMetrics().density;
+            mIsRTL = sliderView.getResources().getBoolean(R.bool.is_right_to_left);
+            mTouchableArea = 300 * mDensity;
         }
 
         /**
@@ -173,7 +152,9 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
          * @param startState <b>(default - <b color="#EF6C00">{@link State#HIDDEN}</b>)</b>
          * */
         public Builder withStartState(@NonNull State startState){
-            this.startState = startState;
+            if (!mStateRestored) {
+                this.mStartState = startState;
+            }
             return this;
         }
 
@@ -183,7 +164,9 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
          * @param gravity <b>(default - <b color="#EF6C00">{@link android.view.Gravity#BOTTOM}</b>)</b>
          * */
         public Builder withStartGravity(@StartVector int gravity){
-            startGravity = gravity;
+            if (!mStateRestored) {
+                mStartGravity = gravity;
+            }
             return this;
         }
 
@@ -193,7 +176,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
          * @param listeners {@link List} of listeners
          * */
         public Builder withListeners(@NonNull List<Listener> listeners){
-            this.listeners = listeners;
+            this.mListeners = listeners;
             return this;
         }
 
@@ -214,7 +197,9 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
          * @param enabled <b>(default - <b color="#EF6C00">false</b>)</b>
          * */
         public Builder withLoggingEnabled(boolean enabled){
-            debug = enabled;
+            if (!mStateRestored) {
+                mDebug = enabled;
+            }
             return this;
         }
 
@@ -224,7 +209,9 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
          * @param duration <b>(default - <b color="#EF6C00">300</b>)</b>
          * */
         public Builder withAutoSlideDuration(int duration){
-            autoSlideDuration = duration;
+            if (!mStateRestored) {
+                mAutoSlideDuration = duration;
+            }
             return this;
         }
 
@@ -234,7 +221,9 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
          * @param area <b>(default - <b color="#EF6C00">300dp</b>)</b>
          * */
         public Builder withTouchableArea(float area){
-            touchableArea = area * density;
+            if (!mStateRestored) {
+                mTouchableArea = area * mDensity;
+            }
             return this;
         }
 
@@ -244,7 +233,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
          * @param enabled <b>(default - <b color="#EF6C00">true</b>)</b>
          * */
         public Builder withGesturesEnabled(boolean enabled){
-            gesturesEnabled = enabled;
+            mGesturesEnabled = enabled;
             return this;
         }
 
@@ -254,7 +243,9 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
          * @param hide <b>(default - <b color="#EF6C00">false</b>)</b>
          * */
         public Builder withHideSoftInputWhenDisplayed(boolean hide){
-            hideKeyboard = hide;
+            if (!mStateRestored) {
+                mHideKeyboard = hide;
+            }
             return this;
         }
         
@@ -264,15 +255,11 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
          * @param interpolator <b>(default - <b color="#EF6C00">Decelerate interpolator</b>)</b>
          * */
         public Builder withInterpolator(TimeInterpolator interpolator){
-            this.interpolator = interpolator;
+            this.mInterpolator = interpolator;
             return this;
         }
         
         /**
-         * <p>
-         * <b color="#EF6C00">IMPORTANT:</b>
-         * If you want to restore saved parameters, place this method at the end of builder
-         * </p>
          * @param savedState parameters will be restored from this bundle, if it contains them
          * */
         public Builder withSavedState(@Nullable Bundle savedState){
@@ -292,13 +279,15 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
          * */
         private void restoreParams(@Nullable Bundle savedState){
             if (savedState == null) return;
-            if (savedState.getParcelable(KEY_STATE) != null)
-                startState = savedState.getParcelable(KEY_STATE);
-            startGravity = savedState.getInt(KEY_START_GRAVITY, startGravity);
-            debug = savedState.getBoolean(KEY_DEBUG, debug);
-            touchableArea = savedState.getFloat(KEY_TOUCHABLE_AREA, touchableArea) * density;
-            autoSlideDuration = savedState.getInt(KEY_AUTO_SLIDE_DURATION, autoSlideDuration);
-            hideKeyboard = savedState.getBoolean(KEY_HIDE_SOFT_INPUT, hideKeyboard);
+            mStateRestored = savedState.getBoolean(KEY_STATE_SAVED, false);
+            if (savedState.getSerializable(KEY_STATE) != null) {
+                mStartState = (SlideUp.State) savedState.getSerializable(KEY_STATE);
+            }
+            mStartGravity = savedState.getInt(KEY_START_GRAVITY, mStartGravity);
+            mDebug = savedState.getBoolean(KEY_DEBUG, mDebug);
+            mTouchableArea = savedState.getFloat(KEY_TOUCHABLE_AREA, mTouchableArea) * mDensity;
+            mAutoSlideDuration = savedState.getInt(KEY_AUTO_SLIDE_DURATION, mAutoSlideDuration);
+            mHideKeyboard = savedState.getBoolean(KEY_HIDE_SOFT_INPUT, mHideKeyboard);
         }
     }
     
@@ -308,8 +297,8 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
      * @see InputMethodManager#hideSoftInputFromWindow(IBinder, int)
      * */
     public void hideSoftInput(){
-        ((InputMethodManager) sliderView.getContext().getSystemService(Context.INPUT_METHOD_SERVICE))
-                .hideSoftInputFromWindow(sliderView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        ((InputMethodManager) mSliderView.getContext().getSystemService(Context.INPUT_METHOD_SERVICE))
+                .hideSoftInputFromWindow(mSliderView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }
     
     /**
@@ -318,42 +307,42 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
      * @see InputMethodManager#showSoftInput(View, int)
      * */
     public void showSoftInput(){
-        ((InputMethodManager) sliderView.getContext().getSystemService(Context.INPUT_METHOD_SERVICE))
-                .showSoftInput(sliderView, 0);
+        ((InputMethodManager) mSliderView.getContext().getSystemService(Context.INPUT_METHOD_SERVICE))
+                .showSoftInput(mSliderView, 0);
     }
     
     private SlideUp(Builder builder){
-        startGravity = builder.startGravity;
-        listeners = builder.listeners;
-        sliderView = builder.sliderView;
-        startState = builder.startState;
-        density = builder.density;
-        touchableArea = builder.touchableArea;
-        autoSlideDuration = builder.autoSlideDuration;
-        debug = builder.debug;
-        isRTL = builder.isRTL;
-        gesturesEnabled = builder.gesturesEnabled;
-        hideKeyboard = builder.hideKeyboard;
-        interpolator = builder.interpolator;
+        mStartGravity = builder.mStartGravity;
+        mListeners = builder.mListeners;
+        mSliderView = builder.mSliderView;
+        mStartState = builder.mStartState;
+        mDensity = builder.mDensity;
+        mTouchableArea = builder.mTouchableArea;
+        mAutoSlideDuration = builder.mAutoSlideDuration;
+        mDebug = builder.mDebug;
+        mIsRTL = builder.mIsRTL;
+        mGesturesEnabled = builder.mGesturesEnabled;
+        mHideKeyboard = builder.mHideKeyboard;
+        mInterpolator = builder.mInterpolator;
         init();
     }
 
     private void init() {
-        sliderView.setOnTouchListener(this);
+        mSliderView.setOnTouchListener(this);
         createAnimation();
-        sliderView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        mSliderView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                viewHeight = sliderView.getHeight();
-                viewWidth = sliderView.getWidth();
-                switch (startGravity){
-                    case TOP:    sliderView.setPivotY(viewHeight); break;
-                    case BOTTOM: sliderView.setPivotY(0);          break;
-                    case START:  sliderView.setPivotX(0);          break;
-                    case END:    sliderView.setPivotX(viewWidth);  break;
+                mViewHeight = mSliderView.getHeight();
+                mViewWidth = mSliderView.getWidth();
+                switch (mStartGravity){
+                    case TOP:    mSliderView.setPivotY(mViewHeight); break;
+                    case BOTTOM: mSliderView.setPivotY(0);          break;
+                    case START:  mSliderView.setPivotX(0);          break;
+                    case END:    mSliderView.setPivotX(mViewWidth);  break;
                 }
                 updateToCurrentState();
-                ViewTreeObserver observer = sliderView.getViewTreeObserver();
+                ViewTreeObserver observer = mSliderView.getViewTreeObserver();
                 if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN) {
                     observer.removeGlobalOnLayoutListener(this);
                 } else {
@@ -365,7 +354,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     }
 
     private void updateToCurrentState() {
-        switch (startState){
+        switch (mStartState){
             case HIDDEN:
                 hideImmediately();
                 break;
@@ -381,28 +370,28 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
      * @return true if view have status {@link View#VISIBLE}
      */
     public boolean isVisible(){
-        return sliderView.getVisibility() == VISIBLE;
+        return mSliderView.getVisibility() == VISIBLE;
     }
 
     /**
      * <p>Add Listener which will be used in combination with this SlideUp</p>
      * */
     public void addSlideListener(@NonNull Listener listener){
-        listeners.add(listener);
+        mListeners.add(listener);
     }
 
     /**
      * <p>Remove Listener which was used in combination with this SlideUp</p>
      * */
     public void removeSlideListener(@NonNull Listener listener){
-        listeners.remove(listener);
+        mListeners.remove(listener);
     }
 
     /**
      * <p>Returns typed view which was used as slider</p>
      * */
     public <T extends View> T getSliderView() {
-        return (T) sliderView;
+        return (T) mSliderView;
     }
 
     /**
@@ -411,14 +400,14 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
      * @param autoSlideDuration <b>(default - <b color="#EF6C00">300</b>)</b>
      * */
     public void setAutoSlideDuration(int autoSlideDuration) {
-        this.autoSlideDuration = autoSlideDuration;
+        this.mAutoSlideDuration = autoSlideDuration;
     }
 
     /**
      * <p>Returns duration of animation (whenever you use {@link #hide()} or {@link #show()} methods)</p>
      * */
     public float getAutoSlideDuration(){
-        return this.autoSlideDuration;
+        return this.mAutoSlideDuration;
     }
 
     /**
@@ -427,14 +416,14 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
      * @param touchableArea <b>(default - <b color="#EF6C00">300dp</b>)</b>
      * */
     public void setTouchableArea(float touchableArea) {
-        this.touchableArea = touchableArea * density;
+        this.mTouchableArea = touchableArea * mDensity;
     }
 
     /**
      * <p>Returns touchable area <b>(in dp)</b> for interaction</p>
      * */
     public float getTouchableArea() {
-        return this.touchableArea / density;
+        return this.mTouchableArea / mDensity;
     }
 
     /**
@@ -443,7 +432,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
      * @return true if animation is running
      * */
     public boolean isAnimationRunning(){
-        return valueAnimator != null && valueAnimator.isRunning();
+        return mValueAnimator != null && mValueAnimator.isRunning();
     }
 
     /**
@@ -480,14 +469,14 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
      * @param enabled <b>(default - <b color="#EF6C00">false</b>)</b>
      * */
     public void setLoggingEnabled(boolean enabled){
-        debug = enabled;
+        mDebug = enabled;
     }
 
     /**
      * <p>Returns current status of debug logging</p>
      * */
     public boolean isLoggingEnabled(){
-        return debug;
+        return mDebug;
     }
 
     /**
@@ -496,21 +485,21 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
      * @param enabled <b>(default - <b color="#EF6C00">true</b>)</b>
      * */
     public void setGesturesEnabled(boolean enabled) {
-        this.gesturesEnabled = enabled;
+        this.mGesturesEnabled = enabled;
     }
 
     /**
      * <p>Returns current status of gestures</p>
      * */
     public boolean isGesturesEnabled() {
-        return gesturesEnabled;
+        return mGesturesEnabled;
     }
     
     /**
      * <p>Returns current interpolator</p>
      * */
     public TimeInterpolator getInterpolator() {
-        return interpolator;
+        return mInterpolator;
     }
     
     /**
@@ -518,7 +507,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
      * */
     @StartVector
     public int getStartGravity() {
-        return startGravity;
+        return mStartGravity;
     }
     
     /**
@@ -527,14 +516,14 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
      * @param interpolator <b>(default - <b color="#EF6C00">Decelerate interpolator</b>)</b>
      * */
     public void setInterpolator(TimeInterpolator interpolator) {
-        valueAnimator.setInterpolator(this.interpolator = interpolator);
+        mValueAnimator.setInterpolator(this.mInterpolator = interpolator);
     }
     
     /**
      * <p>Returns current behavior of soft input</p>
      * */
     public boolean isHideKeyboardWhenDisplayed() {
-        return hideKeyboard;
+        return mHideKeyboard;
     }
     
     /**
@@ -543,111 +532,99 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
      * @param hide <b>(default - <b color="#EF6C00">false</b>)</b>
      * */
     public void setHideKeyboardWhenDisplayed(boolean hide) {
-        hideKeyboard = hide;
+        mHideKeyboard = hide;
     }
 
     /**
      * <p>Toggle current state with animation</p>
      * */
     public void toggle(){
-        if (isVisible())
+        if (isVisible()) {
             hide();
-        else
+        } else {
             show();
+        }
     }
 
     /**
      * <p>Toggle current state without animation</p>
      * */
     public void toggleImmediately(){
-        if (isVisible())
+        if (isVisible()) {
             hideImmediately();
-        else
+        } else {
             showImmediately();
+        }
     }
 
     /**
      * <p>Saving current parameters of SlideUp</p>
-     *
-     * @return {@link Bundle} with saved parameters of SlideUp
      * */
-    public Bundle onSaveInstanceState(@Nullable Bundle savedState){
-        if (savedState == null) savedState = Bundle.EMPTY;
-        savedState.putInt(KEY_START_GRAVITY, startGravity);
-        savedState.putBoolean(KEY_DEBUG, debug);
-        savedState.putFloat(KEY_TOUCHABLE_AREA, touchableArea / density);
-        savedState.putParcelable(KEY_STATE, currentState);
-        savedState.putInt(KEY_AUTO_SLIDE_DURATION, autoSlideDuration);
-        savedState.putBoolean(KEY_HIDE_SOFT_INPUT, hideKeyboard);
-        return savedState;
+    public void onSaveInstanceState(@NonNull Bundle savedState){
+        savedState.putBoolean(KEY_STATE_SAVED, true);
+        savedState.putInt(KEY_START_GRAVITY, mStartGravity);
+        savedState.putBoolean(KEY_DEBUG, mDebug);
+        savedState.putFloat(KEY_TOUCHABLE_AREA, mTouchableArea / mDensity);
+        savedState.putSerializable(KEY_STATE, mCurrentState);
+        savedState.putInt(KEY_AUTO_SLIDE_DURATION, mAutoSlideDuration);
+        savedState.putBoolean(KEY_HIDE_SOFT_INPUT, mHideKeyboard);
     }
 
     private void endAnimation(){
-        if (valueAnimator.getValues() != null)
-            valueAnimator.end();
+        if (mValueAnimator != null && mValueAnimator.getValues() != null && mValueAnimator.isRunning()) {
+            mValueAnimator.end();
+        }
     }
 
     private void hide(boolean immediately) {
         endAnimation();
-        switch (startGravity){
+        switch (mStartGravity){
             case TOP:
                 if (immediately){
-                    if (sliderView.getHeight() > 0){
-                        sliderView.setTranslationY(-viewHeight);
-                        sliderView.setVisibility(GONE);
+                    if (mSliderView.getHeight() > 0){
+                        mSliderView.setTranslationY(-mViewHeight);
                         notifyVisibilityChanged(GONE);
                     }else {
-                        startState = HIDDEN;
+                        mStartState = HIDDEN;
                     }
                 }else {
-                    this.slideAnimationTo = sliderView.getHeight();
-                    valueAnimator.setFloatValues(sliderView.getTranslationY(), slideAnimationTo);
-                    valueAnimator.start();
+                    setValuesAndStart(mSliderView.getTranslationY(), mSliderView.getHeight());
                 }
                 break;
             case BOTTOM:
                 if (immediately){
-                    if (sliderView.getHeight() > 0){
-                        sliderView.setTranslationY(viewHeight);
-                        sliderView.setVisibility(GONE);
+                    if (mSliderView.getHeight() > 0){
+                        mSliderView.setTranslationY(mViewHeight);
                         notifyVisibilityChanged(GONE);
                     }else {
-                        startState = HIDDEN;
+                        mStartState = HIDDEN;
                     }
                 }else {
-                    this.slideAnimationTo = sliderView.getHeight();
-                    valueAnimator.setFloatValues(sliderView.getTranslationY(), slideAnimationTo);
-                    valueAnimator.start();
+                    setValuesAndStart(mSliderView.getTranslationY(), mSliderView.getHeight());
                 }
                 break;
             case START:
                 if (immediately){
-                    if (sliderView.getWidth() > 0){
-                        sliderView.setTranslationX(-viewWidth);
-                        sliderView.setVisibility(GONE);
+                    if (mSliderView.getWidth() > 0){
+                        mSliderView.setTranslationX(-mViewWidth);
                         notifyVisibilityChanged(GONE);
                     }else {
-                        startState = HIDDEN;
+                        mStartState = HIDDEN;
                     }
                 }else {
-                    this.slideAnimationTo = sliderView.getWidth();
-                    valueAnimator.setFloatValues(sliderView.getTranslationX(), slideAnimationTo);
-                    valueAnimator.start();
+                    setValuesAndStart(mSliderView.getTranslationX(), mSliderView.getHeight());
                 }
                 break;
             case END:
                 if (immediately){
-                    if (sliderView.getWidth() > 0){
-                        sliderView.setTranslationX(viewWidth);
-                        sliderView.setVisibility(GONE);
+                    if (mSliderView.getWidth() > 0){
+                        mSliderView.setTranslationX(mViewWidth);
                         notifyVisibilityChanged(GONE);
                     }else {
-                        startState = HIDDEN;
+                        mStartState = HIDDEN;
                     }
                 }else {
-                    this.slideAnimationTo = sliderView.getWidth();
-                    valueAnimator.setFloatValues(sliderView.getTranslationX(), slideAnimationTo);
-                    valueAnimator.start();
+                    setValuesAndStart(mSliderView.getTranslationX(), mSliderView.getHeight());
                 }
                 break;
         }
@@ -655,81 +632,75 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     
     private void show(boolean immediately){
         endAnimation();
-        switch (startGravity) {
+        switch (mStartGravity) {
             case TOP:
                 if (immediately){
-                    if (sliderView.getHeight() > 0){
-                        sliderView.setTranslationY(0);
-                        sliderView.setVisibility(VISIBLE);
+                    if (mSliderView.getHeight() > 0){
+                        mSliderView.setTranslationY(0);
                         notifyVisibilityChanged(VISIBLE);
                     }else {
-                        startState = SHOWED;
+                        mStartState = SHOWED;
                     }
                 }else {
-                    this.slideAnimationTo = 0;
-                    valueAnimator.setFloatValues(sliderView.getTranslationY(), slideAnimationTo);
-                    valueAnimator.start();
+                    setValuesAndStart(mSliderView.getTranslationY(), 0);
                 }
             case BOTTOM:
                 if (immediately){
-                    if (sliderView.getHeight() > 0){
-                        sliderView.setTranslationY(0);
-                        sliderView.setVisibility(VISIBLE);
+                    if (mSliderView.getHeight() > 0){
+                        mSliderView.setTranslationY(0);
                         notifyVisibilityChanged(VISIBLE);
                     }else {
-                        startState = SHOWED;
+                        mStartState = SHOWED;
                     }
                 }else {
-                    this.slideAnimationTo = 0;
-                    valueAnimator.setFloatValues(sliderView.getTranslationY(), slideAnimationTo);
-                    valueAnimator.start();
+                    setValuesAndStart(mSliderView.getTranslationY(), 0);
                 }
                 break;
             case START:
                 if (immediately){
-                    if (sliderView.getWidth() > 0){
-                        sliderView.setTranslationX(0);
-                        sliderView.setVisibility(VISIBLE);
+                    if (mSliderView.getWidth() > 0){
+                        mSliderView.setTranslationX(0);
                         notifyVisibilityChanged(VISIBLE);
                     }else {
-                        startState = SHOWED;
+                        mStartState = SHOWED;
                     }
                 }else {
-                    this.slideAnimationTo = 0;
-                    valueAnimator.setFloatValues(sliderView.getTranslationX(), slideAnimationTo);
-                    valueAnimator.start();
+                    setValuesAndStart(mSliderView.getTranslationX(), 0);
                 }
             case END:
                 if (immediately){
-                    if (sliderView.getWidth() > 0){
-                        sliderView.setTranslationX(0);
-                        sliderView.setVisibility(VISIBLE);
+                    if (mSliderView.getWidth() > 0){
+                        mSliderView.setTranslationX(0);
                         notifyVisibilityChanged(VISIBLE);
                     }else {
-                        startState = SHOWED;
+                        mStartState = SHOWED;
                     }
                 }else {
-                    this.slideAnimationTo = 0;
-                    valueAnimator.setFloatValues(sliderView.getTranslationX(), slideAnimationTo);
-                    valueAnimator.start();
+                    setValuesAndStart(mSliderView.getTranslationX(), 0);
                 }
                 break;
         }
     }
+    
+    private void setValuesAndStart(float from, float to){
+        mSlideAnimationTo = to;
+        mValueAnimator.setFloatValues(from, to);
+        mValueAnimator.start();
+    }
 
     private void createAnimation(){
-        valueAnimator = ValueAnimator.ofFloat();
-        valueAnimator.setDuration(autoSlideDuration);
-        valueAnimator.setInterpolator(interpolator);
-        valueAnimator.addUpdateListener(this);
-        valueAnimator.addListener(this);
+        mValueAnimator = ValueAnimator.ofFloat();
+        mValueAnimator.setDuration(mAutoSlideDuration);
+        mValueAnimator.setInterpolator(mInterpolator);
+        mValueAnimator.addUpdateListener(this);
+        mValueAnimator.addListener(this);
     }
 
     @Override
     public final boolean onTouch(View v, MotionEvent event) {
-        if (!gesturesEnabled) return false;
+        if (!mGesturesEnabled) return false;
         if (isAnimationRunning()) return false;
-        switch (startGravity){
+        switch (mStartGravity){
             case TOP:
                 return onTouchUpToDown(event);
             case BOTTOM:
@@ -748,41 +719,41 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
         float touchedArea = event.getRawX() - getEnd();
         switch (event.getActionMasked()){
             case MotionEvent.ACTION_DOWN:
-                viewWidth = sliderView.getWidth();
-                startPositionX = event.getRawX();
-                viewStartPositionX = sliderView.getTranslationX();
-                if (touchableArea < touchedArea){
-                    canSlide = false;
+                mViewWidth = mSliderView.getWidth();
+                mStartPositionX = event.getRawX();
+                mViewStartPositionX = mSliderView.getTranslationX();
+                if (mTouchableArea < touchedArea){
+                    mCanSlide = false;
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
-                float difference = event.getRawX() - startPositionX;
-                float moveTo = viewStartPositionX + difference;
-                float percents = moveTo * 100 / sliderView.getWidth();
+                float difference = event.getRawX() - mStartPositionX;
+                float moveTo = mViewStartPositionX + difference;
+                float percents = moveTo * 100 / mSliderView.getWidth();
 
-                if (moveTo > 0 && canSlide){
+                if (moveTo > 0 && mCanSlide){
                     notifyPercentChanged(percents);
-                    sliderView.setTranslationX(moveTo);
+                    mSliderView.setTranslationX(moveTo);
                 }
-                if (event.getRawX() > maxSlidePosition) {
-                    maxSlidePosition = event.getRawX();
+                if (event.getRawX() > mMaxSlidePosition) {
+                    mMaxSlidePosition = event.getRawX();
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                float slideAnimationFrom = sliderView.getTranslationX();
-                if (slideAnimationFrom == viewStartPositionX) return false;
-                boolean mustShow = maxSlidePosition > event.getRawX();
-                boolean scrollableAreaConsumed = sliderView.getTranslationX() > sliderView.getWidth() / 5;
+                float slideAnimationFrom = mSliderView.getTranslationX();
+                if (slideAnimationFrom == mViewStartPositionX) return false;
+                boolean mustShow = mMaxSlidePosition > event.getRawX();
+                boolean scrollableAreaConsumed = mSliderView.getTranslationX() > mSliderView.getWidth() / 5;
 
                 if (scrollableAreaConsumed && !mustShow){
-                    slideAnimationTo = sliderView.getWidth();
+                    mSlideAnimationTo = mSliderView.getWidth();
                 }else {
-                    slideAnimationTo = 0;
+                    mSlideAnimationTo = 0;
                 }
-                valueAnimator.setFloatValues(slideAnimationFrom, slideAnimationTo);
-                valueAnimator.start();
-                canSlide = true;
-                maxSlidePosition = 0;
+                mValueAnimator.setFloatValues(slideAnimationFrom, mSlideAnimationTo);
+                mValueAnimator.start();
+                mCanSlide = true;
+                mMaxSlidePosition = 0;
                 break;
         }
         return true;
@@ -792,131 +763,129 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
         float touchedArea = getEnd() - event.getRawX();
         switch (event.getActionMasked()){
             case MotionEvent.ACTION_DOWN:
-                maxSlidePosition = viewWidth;
-                viewWidth = sliderView.getWidth();
-                startPositionX = event.getRawX();
-                viewStartPositionX = sliderView.getTranslationX();
-                if (touchableArea < touchedArea){
-                    canSlide = false;
+                mMaxSlidePosition = mViewWidth;
+                mViewWidth = mSliderView.getWidth();
+                mStartPositionX = event.getRawX();
+                mViewStartPositionX = mSliderView.getTranslationX();
+                if (mTouchableArea < touchedArea){
+                    mCanSlide = false;
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
-                float difference = event.getRawX() - startPositionX;
-                float moveTo = viewStartPositionX + difference;
-                float percents = moveTo * 100 / -sliderView.getWidth();
+                float difference = event.getRawX() - mStartPositionX;
+                float moveTo = mViewStartPositionX + difference;
+                float percents = moveTo * 100 / -mSliderView.getWidth();
 
-                if (moveTo < 0 && canSlide){
+                if (moveTo < 0 && mCanSlide){
                     notifyPercentChanged(percents);
-                    sliderView.setTranslationX(moveTo);
+                    mSliderView.setTranslationX(moveTo);
                 }
-                if (event.getRawX() < maxSlidePosition) {
-                    maxSlidePosition = event.getRawX();
+                if (event.getRawX() < mMaxSlidePosition) {
+                    mMaxSlidePosition = event.getRawX();
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                float slideAnimationFrom = -sliderView.getTranslationX();
-                if (slideAnimationFrom == viewStartPositionX) return false;
-                boolean mustShow = maxSlidePosition < event.getRawX();
-                boolean scrollableAreaConsumed = sliderView.getTranslationX() < -sliderView.getHeight() / 5;
+                float slideAnimationFrom = -mSliderView.getTranslationX();
+                if (slideAnimationFrom == mViewStartPositionX) return false;
+                boolean mustShow = mMaxSlidePosition < event.getRawX();
+                boolean scrollableAreaConsumed = mSliderView.getTranslationX() < -mSliderView.getHeight() / 5;
 
                 if (scrollableAreaConsumed && !mustShow){
-                    slideAnimationTo = sliderView.getWidth();
+                    mSlideAnimationTo = mSliderView.getWidth();
                 }else {
-                    slideAnimationTo = 0;
+                    mSlideAnimationTo = 0;
                 }
-                valueAnimator.setFloatValues(slideAnimationFrom, slideAnimationTo);
-                valueAnimator.start();
-                canSlide = true;
-                maxSlidePosition = 0;
+                mValueAnimator.setFloatValues(slideAnimationFrom, mSlideAnimationTo);
+                mValueAnimator.start();
+                mCanSlide = true;
+                mMaxSlidePosition = 0;
                 break;
         }
         return true;
     }
 
     private boolean onTouchDownToUp(MotionEvent event){
-        float touchedArea = event.getRawY() - sliderView.getTop();
+        float touchedArea = event.getRawY() - mSliderView.getTop();
         switch (event.getActionMasked()){
             case MotionEvent.ACTION_DOWN:
-                viewHeight = sliderView.getHeight();
-                startPositionY = event.getRawY();
-                viewStartPositionY = sliderView.getTranslationY();
-                if (touchableArea < touchedArea){
-                    canSlide = false;
-                }
+                mViewHeight = mSliderView.getHeight();
+                mStartPositionY = event.getRawY();
+                mViewStartPositionY = mSliderView.getTranslationY();
+                mCanSlide = mTouchableArea >= touchedArea;
                 break;
             case MotionEvent.ACTION_MOVE:
-                float difference = event.getRawY() - startPositionY;
-                float moveTo = viewStartPositionY + difference;
-                float percents = moveTo * 100 / sliderView.getHeight();
+                float difference = event.getRawY() - mStartPositionY;
+                float moveTo = mViewStartPositionY + difference;
+                float percents = moveTo * 100 / mSliderView.getHeight();
                 
-                if (moveTo > 0 && canSlide){
+                if (moveTo > 0 && mCanSlide){
                     notifyPercentChanged(percents);
-                    sliderView.setTranslationY(moveTo);
+                    mSliderView.setTranslationY(moveTo);
                 }
-                if (event.getRawY() > maxSlidePosition) {
-                    maxSlidePosition = event.getRawY();
+                if (event.getRawY() > mMaxSlidePosition) {
+                    mMaxSlidePosition = event.getRawY();
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                float slideAnimationFrom = sliderView.getTranslationY();
-                if (slideAnimationFrom == viewStartPositionY) return false;
-                boolean mustShow = maxSlidePosition > event.getRawY();
-                boolean scrollableAreaConsumed = sliderView.getTranslationY() > sliderView.getHeight() / 5;
+                float slideAnimationFrom = mSliderView.getTranslationY();
+                if (slideAnimationFrom == mViewStartPositionY) return false;
+                boolean mustShow = mMaxSlidePosition > event.getRawY();
+                boolean scrollableAreaConsumed = mSliderView.getTranslationY() > mSliderView.getHeight() / 5;
 
                 if (scrollableAreaConsumed && !mustShow){
-                    slideAnimationTo = sliderView.getHeight();
+                    mSlideAnimationTo = mSliderView.getHeight();
                 }else {
-                    slideAnimationTo = 0;
+                    mSlideAnimationTo = 0;
                 }
-                valueAnimator.setFloatValues(slideAnimationFrom, slideAnimationTo);
-                valueAnimator.start();
-                canSlide = true;
-                maxSlidePosition = 0;
+                mValueAnimator.setFloatValues(slideAnimationFrom, mSlideAnimationTo);
+                mValueAnimator.start();
+                mCanSlide = true;
+                mMaxSlidePosition = 0;
                 break;
         }
         return true;
     }
     
     private boolean onTouchUpToDown(MotionEvent event){
-        float touchedArea = event.getRawY() - sliderView.getBottom();
+        float touchedArea = event.getRawY() - mSliderView.getBottom();
         switch (event.getActionMasked()){
             case MotionEvent.ACTION_DOWN:
-                viewHeight = sliderView.getHeight();
-                startPositionY = event.getRawY();
-                viewStartPositionY = sliderView.getTranslationY();
-                maxSlidePosition = viewHeight;
-                if (touchableArea < touchedArea){
-                    canSlide = false;
+                mViewHeight = mSliderView.getHeight();
+                mStartPositionY = event.getRawY();
+                mViewStartPositionY = mSliderView.getTranslationY();
+                mMaxSlidePosition = mViewHeight;
+                if (mTouchableArea < touchedArea){
+                    mCanSlide = false;
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
-                float difference = event.getRawY() - startPositionY;
-                float moveTo = viewStartPositionY + difference;
-                float percents = moveTo * 100 / -sliderView.getHeight();
+                float difference = event.getRawY() - mStartPositionY;
+                float moveTo = mViewStartPositionY + difference;
+                float percents = moveTo * 100 / -mSliderView.getHeight();
                 
-                if (moveTo < 0 && canSlide){
+                if (moveTo < 0 && mCanSlide){
                     notifyPercentChanged(percents);
-                    sliderView.setTranslationY(moveTo);
+                    mSliderView.setTranslationY(moveTo);
                 }
-                if (event.getRawY() < maxSlidePosition) {
-                    maxSlidePosition = event.getRawY();
+                if (event.getRawY() < mMaxSlidePosition) {
+                    mMaxSlidePosition = event.getRawY();
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                float slideAnimationFrom = -sliderView.getTranslationY();
-                if (slideAnimationFrom == viewStartPositionY) return false;
-                boolean mustShow = maxSlidePosition < event.getRawY();
-                boolean scrollableAreaConsumed = sliderView.getTranslationY() < -sliderView.getHeight() / 5;
+                float slideAnimationFrom = -mSliderView.getTranslationY();
+                if (slideAnimationFrom == mViewStartPositionY) return false;
+                boolean mustShow = mMaxSlidePosition < event.getRawY();
+                boolean scrollableAreaConsumed = mSliderView.getTranslationY() < -mSliderView.getHeight() / 5;
 
                 if (scrollableAreaConsumed && !mustShow){
-                    slideAnimationTo = sliderView.getHeight() + sliderView.getTop();
+                    mSlideAnimationTo = mSliderView.getHeight() + mSliderView.getTop();
                 }else {
-                    slideAnimationTo = 0;
+                    mSlideAnimationTo = 0;
                 }
-                valueAnimator.setFloatValues(slideAnimationFrom, slideAnimationTo);
-                valueAnimator.start();
-                canSlide = true;
-                maxSlidePosition = 0;
+                mValueAnimator.setFloatValues(slideAnimationFrom, mSlideAnimationTo);
+                mValueAnimator.start();
+                mCanSlide = true;
+                mMaxSlidePosition = 0;
                 break;
         }
         return true;
@@ -925,7 +894,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     @Override
     public final void onAnimationUpdate(ValueAnimator animation) {
         float value = (float) animation.getAnimatedValue();
-        switch (startGravity){
+        switch (mStartGravity){
             case TOP:    onAnimationUpdateUpToDown(value);   break;
             case BOTTOM: onAnimationUpdateDownToUp(value);   break;
             case START:  onAnimationUpdateStartToEnd(value); break;
@@ -934,98 +903,103 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     }
 
     private void onAnimationUpdateUpToDown(float value){
-        sliderView.setTranslationY(-value);
-        float visibleDistance = sliderView.getTop() - sliderView.getY();
-        float percents = (visibleDistance) * 100 / viewHeight;
+        mSliderView.setTranslationY(-value);
+        float visibleDistance = mSliderView.getTop() - mSliderView.getY();
+        float percents = (visibleDistance) * 100 / mViewHeight;
         notifyPercentChanged(percents);
     }
 
     private void onAnimationUpdateDownToUp(float value){
-        sliderView.setTranslationY(value);
-        float visibleDistance = sliderView.getY() - sliderView.getTop();
-        float percents = (visibleDistance) * 100 / viewHeight;
+        mSliderView.setTranslationY(value);
+        float visibleDistance = mSliderView.getY() - mSliderView.getTop();
+        float percents = (visibleDistance) * 100 / mViewHeight;
         notifyPercentChanged(percents);
     }
 
     private void onAnimationUpdateStartToEnd(float value){
-        sliderView.setTranslationX(-value);
-        float visibleDistance = sliderView.getX() - getStart();
-        float percents = (visibleDistance) * 100 / -viewWidth;
+        mSliderView.setTranslationX(-value);
+        float visibleDistance = mSliderView.getX() - getStart();
+        float percents = (visibleDistance) * 100 / -mViewWidth;
         notifyPercentChanged(percents);
     }
 
     private void onAnimationUpdateEndToStart(float value){
-        sliderView.setTranslationX(value);
-        float visibleDistance = sliderView.getX() - getStart();
-        float percents = (visibleDistance) * 100 / viewWidth;
+        mSliderView.setTranslationX(value);
+        float visibleDistance = mSliderView.getX() - getStart();
+        float percents = (visibleDistance) * 100 / mViewWidth;
         notifyPercentChanged(percents);
     }
 
     private int getStart(){
-        if (isRTL){
-            return sliderView.getRight();
+        if (mIsRTL){
+            return mSliderView.getRight();
         }else {
-            return sliderView.getLeft();
+            return mSliderView.getLeft();
         }
     }
 
     private int getEnd(){
-        if (isRTL){
-            return sliderView.getLeft();
+        if (mIsRTL){
+            return mSliderView.getLeft();
         }else {
-            return sliderView.getRight();
+            return mSliderView.getRight();
         }
     }
 
     private void notifyPercentChanged(float percent){
         percent = percent > 100 ? 100 : percent;
         percent = percent < 0 ? 0 : percent;
-        if (slideAnimationTo == 0 && hideKeyboard)
+        if (mSlideAnimationTo == 0 && mHideKeyboard)
             hideSoftInput();
-        if (listeners != null && !listeners.isEmpty()){
-            for (int i = 0; i < listeners.size(); i++) {
-                Listener l = listeners.get(i);
+        if (mListeners != null && !mListeners.isEmpty()){
+            for (int i = 0; i < mListeners.size(); i++) {
+                Listener l = mListeners.get(i);
                 if (l != null){
-                    l.onSlide(percent);
-                    d("Listener(" + i + ")", "(onSlide)", "value = " + percent);
+                    if (l instanceof Listener.Slide) {
+                        Listener.Slide slide = (Listener.Slide) l;
+                        slide.onSlide(percent);
+                        d("Listener(" + i + ")", "(onSlide)", "value = " + percent);
+                    }
                 }else {
-                    e("Listener(" + i + ")", "(onSlide)", "Listener is null, skip notify for him...");
+                    e("Listener(" + i + ")", "(onSlide)", "Listener is null, skip notification...");
                 }
             }
         }
     }
 
     private void notifyVisibilityChanged(int visibility){
-        if (listeners != null && !listeners.isEmpty()){
-            for (int i = 0; i < listeners.size(); i++) {
-                Listener l = listeners.get(i);
+        mSliderView.setVisibility(visibility);
+        if (mListeners != null && !mListeners.isEmpty()){
+            for (int i = 0; i < mListeners.size(); i++) {
+                Listener l = mListeners.get(i);
                 if (l != null) {
-                    l.onVisibilityChanged(visibility);
-                    d("Listener(" + i + ")", "(onVisibilityChanged)", "value = " + (visibility == VISIBLE ? "VISIBLE" : visibility == GONE ? "GONE" : visibility));
+                    if (l instanceof Listener.Visibility) {
+                        Listener.Visibility vis = (Listener.Visibility)l;
+                        vis.onVisibilityChanged(visibility);
+                        d("Listener(" + i + ")", "(onVisibilityChanged)", "value = " + (visibility == VISIBLE ? "VISIBLE" : visibility == GONE ? "GONE" : visibility));
+                    }
                 }else {
-                    e("Listener(" + i + ")", "(onVisibilityChanged)", "Listener is null, skip  notify for him...");
+                    e("Listener(" + i + ")", "(onVisibilityChanged)", "Listener is null, skip notify for him...");
                 }
             }
         }
         switch (visibility){
-            case VISIBLE: currentState = SHOWED; break;
-            case GONE:    currentState = HIDDEN; break;
+            case VISIBLE: mCurrentState = SHOWED; break;
+            case GONE:    mCurrentState = HIDDEN; break;
         }
     }
 
     @Override
     public final void onAnimationStart(Animator animator) {
-        if (sliderView.getVisibility() != VISIBLE) {
-            sliderView.setVisibility(VISIBLE);
+        if (mSliderView.getVisibility() != VISIBLE) {
             notifyVisibilityChanged(VISIBLE);
         }
     }
 
     @Override
     public final void onAnimationEnd(Animator animator) {
-        if (slideAnimationTo != 0){
-            if (sliderView.getVisibility() != GONE) {
-                sliderView.setVisibility(GONE);
+        if (mSlideAnimationTo != 0){
+            if (mSliderView.getVisibility() != GONE) {
                 notifyVisibilityChanged(GONE);
             }
         }
@@ -1038,12 +1012,14 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     public final void onAnimationRepeat(Animator animator) {}
     
     private void e(String listener, String method, String message){
-        if (debug)
+        if (mDebug) {
             Log.e(TAG, String.format("%1$-15s %2$-23s %3$s", listener, method, message));
+        }
     }
     
     private void d(String listener, String method, String value){
-        if (debug)
+        if (mDebug) {
             Log.d(TAG, String.format("%1$-15s %2$-23s %3$s", listener, method, value));
+        }
     }
 }
