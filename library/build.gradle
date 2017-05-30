@@ -15,9 +15,6 @@ android {
         targetSdkVersion 25
         versionCode 6
         versionName "2.2.4"
-
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
     }
     buildTypes {
         release {
@@ -34,7 +31,6 @@ android {
 }
 
 dependencies {
-
     compile "com.android.support:support-annotations:${versions.support}"
     compile "com.android.support:appcompat-v7:${versions.support}"
 }

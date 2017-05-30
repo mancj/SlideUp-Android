@@ -1,12 +1,10 @@
 # SlideUp-Android
-SlideUp is a small library that allows you to add sweet slide effect to any view.
-
-[![Release](https://jitpack.io/v/mancj/SlideUp-Android.svg)](https://jitpack.io/#mancj/SlideUp-Android)
+SlideUp is a small library that allows you to add sweet slide effect to any view. Slide your views up, down, left or right with SlideUp!
 
 ---
 
-<img src="/art/art1.gif" width="300">
-<img src="/art/art2.gif" width="300">
+<img src="https://github.com/mancj/mancj.github.io/blob/master/other/slideup-art/art1.gif" width="300">
+<img src="https://github.com/mancj/mancj.github.io/blob/master/other/slideup-art/art2.gif" width="300">
 
 ---
 # Usage
@@ -25,7 +23,7 @@ allprojects {
 Add the dependency
 ```groovy
 dependencies {
-    compile 'com.github.mancj:SlideUp-Android:2.2'
+    compile 'com.github.mancj:SlideUp-Android:2.2.3'
 }
 ```
 
@@ -50,7 +48,7 @@ View slideView = findViewById(R.id.slideView);
 ### Step 3:
 Create a SlideUp object and pass in your view
 ```java
-slideUp = new SlideUp.Builder<>(slideView)
+slideUp = new SlideUp.Builder(slideView)
                 .withStartState(SlideUp.State.HIDDEN)
                 .withStartGravity(Gravity.BOTTOM)
                 .build();
@@ -65,7 +63,7 @@ dim = findViewById(R.id.dim);
 fab = (FloatingActionButton) findViewById(R.id.fab);
 
 
-slideUp = new SlideUp.Builder<>(slideView)
+slideUp = new SlideUp.Builder(slideView)
          .withListeners(new SlideUp.Listener() {
              @Override
              public void onSlide(float percent) {
