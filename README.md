@@ -23,6 +23,8 @@ Add the dependency
 ```groovy
 dependencies {
     compile 'com.github.mancj:SlideUp-Android:2.2.5'
+    compile 'ru.ztrap:RxSlideUp2:2.0.0' //for reactive listeners based on RxJava-2
+    compile 'ru.ztrap:RxSlideUp:1.0.0' //for reactive listeners based on RxJava
 }
 ```
 
@@ -52,9 +54,14 @@ slideUp = new SlideUp.Builder(slideView)
                 .withStartGravity(Gravity.BOTTOM)
                 .build();
 ```
-## Enjoy!
-# More complicated example
+### Enjoy!
 
+# Reactive extensions
+
+ - [RxSlideUp](https://github.com/zTrap/RxSlideUp) - Listening events in reactive style
+
+# More complicated example
+[SlideUpViewActivity.java](https://github.com/mancj/SlideUp-Android/blob/master/app/src/main/java/com/example/slideup/SlideUpViewActivity.java)
 ```java
 slideView = findViewById(R.id.slideView);
 dim = findViewById(R.id.dim);
@@ -88,7 +95,4 @@ fab.setOnClickListener(new View.OnClickListener() {
     }
 });
 ```
-See [SlideUpViewActivity.java](https://github.com/mancj/SlideUp-Android/blob/master/app/src/main/java/com/example/slideup/SlideUpViewActivity.java)
-
------
 The player is designed by [Jauzee](https://github.com/Jauzee)
