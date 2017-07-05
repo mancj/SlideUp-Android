@@ -32,7 +32,7 @@ import static android.view.View.VISIBLE;
 import static com.mancj.slideup.SlideUp.State.HIDDEN;
 import static com.mancj.slideup.SlideUp.State.SHOWED;
 
-public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpdateListener, Animator.AnimatorListener {
+public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpdateListener, Animator.AnimatorListener, LoggerNotifier {
     private final static String TAG = SlideUp.class.getSimpleName();
 
     private final static String KEY_START_GRAVITY = TAG + "_start_gravity";
@@ -945,8 +945,9 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
             return mSliderView.getRight();
         }
     }
-
-    private void notifyPercentChanged(float percent){
+    
+    @Override
+    public void notifyPercentChanged(float percent){
         percent = percent > 100 ? 100 : percent;
         percent = percent < 0 ? 0 : percent;
         if (mSlideAnimationTo == 0 && mHideKeyboard)
@@ -966,8 +967,9 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
             }
         }
     }
-
-    private void notifyVisibilityChanged(int visibility){
+    
+    @Override
+    public void notifyVisibilityChanged(int visibility){
         mSliderView.setVisibility(visibility);
         if (mListeners != null && !mListeners.isEmpty()){
             for (int i = 0; i < mListeners.size(); i++) {
