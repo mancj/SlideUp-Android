@@ -3,7 +3,7 @@ package com.mancj.slideup;
 /**
  * @author pa.gulko zTrap (05.07.2017)
  */
-public interface LoggerNotifier {
+interface LoggerNotifier {
     
     void notifyPercentChanged(float percent);
     

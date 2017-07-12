@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.mancj.slideup.SlideUp;
+import com.mancj.slideup.SlideUpBuilder;
 
 public class SlideDownViewActivity extends AppCompatActivity {
     private SlideUp slideUp;
@@ -29,7 +30,7 @@ public class SlideDownViewActivity extends AppCompatActivity {
         dim = findViewById(R.id.dim);
         fab = (FloatingActionButton) findViewById(R.id.fab);
 
-        slideUp = new SlideUp.Builder(sliderView)
+        slideUp = new SlideUpBuilder(sliderView)
                 .withListeners(new SlideUp.Listener.Events() {
                     @Override
                     public void onSlide(float percent) {
