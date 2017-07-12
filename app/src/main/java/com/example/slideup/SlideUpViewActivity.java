@@ -25,7 +25,7 @@ public class SlideUpViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_slide_up_view);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         sliderView = findViewById(R.id.slideView);
@@ -40,7 +40,7 @@ public class SlideUpViewActivity extends AppCompatActivity {
             }
         });
         dim = findViewById(R.id.dim);
-        fab = findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
 
         slideUp = new SlideUpBuilder(sliderView)
                 .withListeners(new SlideUp.Listener.Events() {
