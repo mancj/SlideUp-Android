@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.mancj.slideup.SlideUp;
+import com.mancj.slideup.SlideUpBuilder;
 
 public class SlideUpViewActivity extends AppCompatActivity {
     private SlideUp slideUp;
@@ -24,7 +25,7 @@ public class SlideUpViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_slide_up_view);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         sliderView = findViewById(R.id.slideView);
@@ -39,9 +40,9 @@ public class SlideUpViewActivity extends AppCompatActivity {
             }
         });
         dim = findViewById(R.id.dim);
-        fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = findViewById(R.id.fab);
 
-        slideUp = new SlideUp.Builder(sliderView)
+        slideUp = new SlideUpBuilder(sliderView)
                 .withListeners(new SlideUp.Listener.Events() {
                     @Override
                     public void onSlide(float percent) {
