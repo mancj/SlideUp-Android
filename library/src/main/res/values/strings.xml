@@ -1,3 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SlideUp</string>
+    <string name="define_slideup_android">owner;year</string>
+    <!-- Author section -->
+    <string name="library_slideup_android_author">Mansur (Mancj)</string>
+    <string name="library_slideup_android_authorWebsite">https://mancj.github.io/</string>
+    <!-- Library section -->
+    <string name="library_slideup_android_libraryName">SlideUp-Android</string>
+    <string name="library_slideup_android_libraryDescription">
+        <![CDATA[
+        <b>SlideUp</b> is a small library that allows you to add sweet slide effect to any view. Slide your views up, down, left or right with <b>SlideUp</b>!
+        ]]>
+    </string>
+    <string name="library_slideup_android_libraryWebsite">https://github.com/mancj/SlideUp-Android/</string>
+    <string name="library_slideup_android_libraryVersion">2.2.7</string>
+    <!-- OpenSource section -->
+    <string name="library_slideup_android_isOpenSource">true</string>
+    <string name="library_slideup_android_repositoryLink">https://github.com/mancj/SlideUp-Android/blob/master/LICENSE</string>
+    <!-- ClassPath for autoDetect section -->
+    <string name="library_slideup_android_classPath">com.mancj.slideup.SlideUp</string>
+    <!-- License section -->
+    <string name="library_slideup_android_licenseId">mit</string>
+    <!-- Custom variables section -->
+    <string name="library_AboutLibraries_owner">Mancj</string>
+    <string name="library_AboutLibraries_year">2017</string>
 </resources>
