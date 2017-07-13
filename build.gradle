@@ -1,7 +1,7 @@
 buildscript {
     ext {
         versions = [
-                support        : '26.0.0-beta2',
+                support        : '25.4.0',
                 SlideUp        : '2.2.1',
                 Rx             : [
                         Java     : '1.3.0'
@@ -10,17 +10,17 @@ buildscript {
     }
     repositories {
         jcenter()
-        google()
+        maven { url 'https://maven.google.com' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0-alpha6'
+        classpath 'com.android.tools.build:gradle:2.3.3'
     }
 }
 
 allprojects {
     repositories {
         jcenter()
-        google()
+        maven { url 'https://maven.google.com' }
     }
 }
 
