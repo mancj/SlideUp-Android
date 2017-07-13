@@ -1,4 +1,7 @@
- # 2.2.6
+ 
+ # 2.2.7 (13.07.2017)
+  - Added definition info for [AboutLibrary](https://github.com/mikepenz/AboutLibraries) (MikePenz)
+ # 2.2.6 (13.07.2017)
   - fixed problems with clicks onto `view` with `SlideUp`-effect
   - `SlideUp.Builder` was moved into separated class and renamed to `SlideUpBuilder`
   #### SlideUp
