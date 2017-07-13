@@ -22,7 +22,7 @@ allprojects {
 Add the dependency
 ```groovy
 dependencies {
-    compile 'com.github.mancj:SlideUp-Android:2.2.5'
+    compile 'com.github.mancj:SlideUp-Android:2.2.6'
     compile 'ru.ztrap:RxSlideUp2:2.0.0' //for reactive listeners based on RxJava-2
     compile 'ru.ztrap:RxSlideUp:1.0.0' //for reactive listeners based on RxJava
 }
@@ -49,7 +49,7 @@ View slideView = findViewById(R.id.slideView);
 ### Step 3:
 Create a SlideUp object and pass in your view
 ```java
-slideUp = new SlideUp.Builder(slideView)
+slideUp = new SlideUpBuilder(slideView)
                 .withStartState(SlideUp.State.HIDDEN)
                 .withStartGravity(Gravity.BOTTOM)
                 .build();
@@ -68,7 +68,7 @@ dim = findViewById(R.id.dim);
 fab = (FloatingActionButton) findViewById(R.id.fab);
 
 
-slideUp = new SlideUp.Builder(slideView)
+slideUp = new SlideUpBuilder(slideView)
          .withListeners(new SlideUp.Listener.Events() {
              @Override
              public void onSlide(float percent) {

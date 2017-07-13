@@ -9,6 +9,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.mancj.slideup.SlideUp;
 import com.mancj.slideup.SlideUpBuilder;
@@ -18,6 +19,7 @@ public class SlideEndViewActivity extends AppCompatActivity {
     private View dim;
     private View sliderView;
     private FloatingActionButton fab;
+    Toast toast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +29,16 @@ public class SlideEndViewActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         sliderView = findViewById(R.id.slideView);
+        sliderView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (toast != null){
+                    toast.cancel();
+                }
+                toast = Toast.makeText(SlideEndViewActivity.this, "click", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        });
         dim = findViewById(R.id.dim);
         fab = (FloatingActionButton) findViewById(R.id.fab);
 
