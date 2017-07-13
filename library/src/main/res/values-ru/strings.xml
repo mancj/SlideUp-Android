@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="library_slideup_android_authorWebsite">http://mancj.info/</string>
+    <string name="library_slideup_android_libraryDescription">
+        <![CDATA[
+        <b>SlideUp</b> это маленькая библиотека, которая позволяет легко добавить слайд-эффект для любого View-компонента. Слайдите view вверх, вниз, вправо или влево с <b>SlideUp</b>!
+        ]]>
+    </string>
+</resources>
