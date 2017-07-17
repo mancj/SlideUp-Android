@@ -23,8 +23,8 @@ Add the dependency
 ```groovy
 dependencies {
     compile 'com.github.mancj:SlideUp-Android:2.2.7'
-    compile 'ru.ztrap:RxSlideUp2:2.0.0' //for reactive listeners based on RxJava-2
-    compile 'ru.ztrap:RxSlideUp:1.0.0' //for reactive listeners based on RxJava
+    compile 'ru.ztrap:RxSlideUp2:2.0.0' //optional, for reactive listeners based on RxJava-2
+    compile 'ru.ztrap:RxSlideUp:1.0.0' //optional, for reactive listeners based on RxJava
 }
 ```
 
@@ -52,6 +52,16 @@ Create a SlideUp object and pass in your view
 slideUp = new SlideUpBuilder(slideView)
                 .withStartState(SlideUp.State.HIDDEN)
                 .withStartGravity(Gravity.BOTTOM)
+                
+                //.withGesturesEnabled()
+                //.withHideSoftInputWhenDisplayed()
+                //.withInterpolator()
+                //.withAutoSlideDuration()
+                //.withLoggingEnabled()
+                //.withTouchableAreaPx()
+                //.withTouchableAreaDp()
+                //.withListeners()
+                //.withSavedState()
                 .build();
 ```
 ### Enjoy!
@@ -60,7 +70,7 @@ slideUp = new SlideUpBuilder(slideView)
 
  - [RxSlideUp](https://github.com/zTrap/RxSlideUp) - Listening events in reactive style
 
-# More complicated example
+# Advanced example
 [SlideUpViewActivity.java](https://github.com/mancj/SlideUp-Android/blob/master/app/src/main/java/com/example/slideup/SlideUpViewActivity.java)
 ```java
 slideView = findViewById(R.id.slideView);
@@ -96,6 +106,18 @@ fab.setOnClickListener(new View.OnClickListener() {
 });
 ```
 The player is designed by [Jauzee](https://github.com/Jauzee)
+ 
+# Migration
+ 
+ - See [MIGRATION.md](https://github.com/mancj/SlideUp-Android/blob/master/MIGRATION.md)
+ 
+# Documentation
+ 
+ - See [javadocs](https://jitpack.io/com/github/mancj/SlideUp-Android/2.2.7/javadoc/)
+ 
+# Changelog
+
+ - See [CHANGELOG.md](https://github.com/mancj/SlideUp-Android/blob/master/CHANGELOG.md)
 
 # Contract
 
