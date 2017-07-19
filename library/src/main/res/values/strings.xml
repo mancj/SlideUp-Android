@@ -21,6 +21,6 @@
     <!-- License section -->
     <string name="library_slideup_android_licenseId">mit</string>
     <!-- Custom variables section -->
-    <string name="library_AboutLibraries_owner">Mancj</string>
-    <string name="library_AboutLibraries_year">2017</string>
+    <string name="library_slideup_owner">Mancj</string>
+    <string name="library_slideup_year">2017</string>
 </resources>
