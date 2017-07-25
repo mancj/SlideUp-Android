@@ -22,9 +22,9 @@ allprojects {
 Add the dependency
 ```groovy
 dependencies {
-    compile 'com.github.mancj:SlideUp-Android:2.2.7'
-    compile 'ru.ztrap:RxSlideUp2:2.0.0' //optional, for reactive listeners based on RxJava-2
-    compile 'ru.ztrap:RxSlideUp:1.0.0' //optional, for reactive listeners based on RxJava
+    compile "com.github.mancj:SlideUp-Android:$current_version"
+    compile 'ru.ztrap:RxSlideUp2:2.x.x' //optional, for reactive listeners based on RxJava-2
+    compile 'ru.ztrap:RxSlideUp:1.x.x' //optional, for reactive listeners based on RxJava
 }
 ```
 
