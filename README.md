@@ -113,7 +113,7 @@ The player is designed by [Jauzee](https://github.com/Jauzee)
  
 # Documentation
  
- - See [javadocs](https://jitpack.io/com/github/mancj/SlideUp-Android/2.2.7/javadoc/)
+ - See [javadocs](https://jitpack.io/com/github/mancj/SlideUp-Android/2.2.7.1/javadoc/)
  
 # Changelog
 
