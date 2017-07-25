@@ -1,3 +1,6 @@
+## v2.2.7.1 (25.07.2017)
+  - Fixed wrong identifiers for [AboutLibraries](https://github.com/mikepenz/AboutLibraries) (© MikePenz)
+  
 ## v2.2.7 (13.07.2017)
   - Added definition info for [AboutLibraries](https://github.com/mikepenz/AboutLibraries) (© MikePenz)
   
