@@ -15,7 +15,7 @@ Add it in your root build.gradle at the end of repositories:
 allprojects {
   repositories {
     ...
-    maven { url 'https://jitpack.io" }
+    maven { url 'https://jitpack.io' }
     maven { url "https://maven.google.com" } // or google() in AS 3.0
   }
 }
