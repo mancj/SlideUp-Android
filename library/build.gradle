@@ -1,12 +1,12 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.3'
+    compileSdkVersion 27
+    buildToolsVersion '27.0.1'
 
     defaultConfig {
-        minSdkVersion 12
-        targetSdkVersion 25
+        minSdkVersion 14
+        targetSdkVersion 27
         versionCode 8
         versionName "2.2.7.1"
     }
@@ -27,8 +27,7 @@ android {
 }
 
 dependencies {
-    compile "com.android.support:support-annotations:${versions.support}"
-    compile "com.android.support:appcompat-v7:${versions.support}"
+    implementation "com.android.support:support-annotations:${versions.support}"
 }
 
 task androidJavadocs(type: Javadoc) {
