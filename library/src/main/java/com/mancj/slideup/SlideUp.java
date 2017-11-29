@@ -524,6 +524,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
         if (mAnimationProcessor.isAnimationRunning()) return false;
         if (!mBuilder.mGesturesEnabled){
             mBuilder.mSliderView.performClick();
+            return true;
         }
         boolean consumed;
         switch (mBuilder.mStartGravity) {
