@@ -53,7 +53,8 @@ Create a SlideUp object and pass in your view
 slideUp = new SlideUpBuilder(slideView)
                 .withStartState(SlideUp.State.HIDDEN)
                 .withStartGravity(Gravity.BOTTOM)
-                
+
+                //.withSlideFromOtherView(anotherView)
                 //.withGesturesEnabled()
                 //.withHideSoftInputWhenDisplayed()
                 //.withInterpolator()
@@ -74,6 +75,7 @@ slideUp = new SlideUpBuilder(slideView)
 # Advanced example
 [SlideUpViewActivity.java](https://github.com/mancj/SlideUp-Android/blob/master/app/src/main/java/com/example/slideup/SlideUpViewActivity.java)
 ```java
+rootView = findViewById(R.id.rootView);
 slideView = findViewById(R.id.slideView);
 dim = findViewById(R.id.dim);
 fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -84,6 +86,10 @@ slideUp = new SlideUpBuilder(slideView)
              @Override
              public void onSlide(float percent) {
                  dim.setAlpha(1 - (percent / 100));
+                 if (percent < 100) {
+                    // slideUp started showing
+                    fab.hide()
+                 }
              }
 
              @Override
@@ -96,13 +102,13 @@ slideUp = new SlideUpBuilder(slideView)
          .withStartGravity(Gravity.TOP)
          .withLoggingEnabled(true)
          .withStartState(SlideUp.State.HIDDEN)
+         .withSlideFromOtherView(rootView)
          .build();
 
 fab.setOnClickListener(new View.OnClickListener() {
     @Override
     public void onClick(View view) {
         slideUp.show();
-        fab.hide();
     }
 });
 ```
