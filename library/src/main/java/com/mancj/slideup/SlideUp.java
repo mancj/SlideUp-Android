@@ -101,6 +101,9 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     
     private void init() {
         mBuilder.mSliderView.setOnTouchListener(this);
+        if(mBuilder.mAlsoScrollView != null) {
+            mBuilder.mAlsoScrollView.setOnTouchListener(this);
+        }
         createAnimation();
         mBuilder.mSliderView.getViewTreeObserver().addOnGlobalLayoutListener(
                 new OnGlobalLayoutSingleListener(mBuilder.mSliderView, new Runnable() {
@@ -420,7 +423,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 if (immediately) {
                     if (mBuilder.mSliderView.getHeight() > 0) {
                         mBuilder.mSliderView.setTranslationY(-mViewHeight);
-                        notifyVisibilityChanged(GONE);
+                        notifyPercentChanged(100);
                     } else {
                         mBuilder.mStartState = HIDDEN;
                     }
@@ -432,7 +435,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 if (immediately) {
                     if (mBuilder.mSliderView.getHeight() > 0) {
                         mBuilder.mSliderView.setTranslationY(mViewHeight);
-                        notifyVisibilityChanged(GONE);
+                        notifyPercentChanged(100);
                     } else {
                         mBuilder.mStartState = HIDDEN;
                     }
@@ -444,7 +447,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 if (immediately) {
                     if (mBuilder.mSliderView.getWidth() > 0) {
                         mBuilder.mSliderView.setTranslationX(-mViewWidth);
-                        notifyVisibilityChanged(GONE);
+                        notifyPercentChanged(100);
                     } else {
                         mBuilder.mStartState = HIDDEN;
                     }
@@ -456,7 +459,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 if (immediately) {
                     if (mBuilder.mSliderView.getWidth() > 0) {
                         mBuilder.mSliderView.setTranslationX(mViewWidth);
-                        notifyVisibilityChanged(GONE);
+                        notifyPercentChanged(100);
                     } else {
                         mBuilder.mStartState = HIDDEN;
                     }
@@ -474,7 +477,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 if (immediately) {
                     if (mBuilder.mSliderView.getHeight() > 0) {
                         mBuilder.mSliderView.setTranslationY(0);
-                        notifyVisibilityChanged(VISIBLE);
+                        notifyPercentChanged(0);
                     } else {
                         mBuilder.mStartState = SHOWED;
                     }
@@ -485,7 +488,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 if (immediately) {
                     if (mBuilder.mSliderView.getHeight() > 0) {
                         mBuilder.mSliderView.setTranslationY(0);
-                        notifyVisibilityChanged(VISIBLE);
+                        notifyPercentChanged(0);
                     } else {
                         mBuilder.mStartState = SHOWED;
                     }
@@ -497,7 +500,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 if (immediately) {
                     if (mBuilder.mSliderView.getWidth() > 0) {
                         mBuilder.mSliderView.setTranslationX(0);
-                        notifyVisibilityChanged(VISIBLE);
+                        notifyPercentChanged(0);
                     } else {
                         mBuilder.mStartState = SHOWED;
                     }
@@ -508,7 +511,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 if (immediately) {
                     if (mBuilder.mSliderView.getWidth() > 0) {
                         mBuilder.mSliderView.setTranslationX(0);
-                        notifyVisibilityChanged(VISIBLE);
+                        notifyPercentChanged(0);
                     } else {
                         mBuilder.mStartState = SHOWED;
                     }
@@ -529,16 +532,16 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
         boolean consumed;
         switch (mBuilder.mStartGravity) {
             case TOP:
-                consumed = mVerticalTouchConsumer.consumeTopToBottom(event);
+                consumed = mVerticalTouchConsumer.consumeTopToBottom(v, event);
                 break;
             case BOTTOM:
-                consumed = mVerticalTouchConsumer.consumeBottomToTop(event);
+                consumed = mVerticalTouchConsumer.consumeBottomToTop(v, event);
                 break;
             case START:
-                consumed = mHorizontalTouchConsumer.consumeStartToEnd(event);
+                consumed = mHorizontalTouchConsumer.consumeStartToEnd(v, event);
                 break;
             case END:
-                consumed = mHorizontalTouchConsumer.consumeEndToStart(event);
+                consumed = mHorizontalTouchConsumer.consumeEndToStart(v, event);
                 break;
             default:
                 throw new IllegalArgumentException("You are using not supported gravity");
@@ -608,6 +611,15 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     public void notifyPercentChanged(float percent) {
         percent = percent > 100 ? 100 : percent;
         percent = percent < 0 ? 0 : percent;
+        if (percent == 100) {
+            mBuilder.mSliderView.setVisibility(GONE);
+            notifyVisibilityChanged(GONE);
+        } else {
+            mBuilder.mSliderView.setVisibility(VISIBLE);
+            if (percent == 0) {
+                notifyVisibilityChanged(VISIBLE);
+            }
+        }
         if (mAnimationProcessor.getSlideAnimationTo() == 0 && mBuilder.mHideKeyboard)
             hideSoftInput();
         if (!mBuilder.mListeners.isEmpty()) {
@@ -628,7 +640,6 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     
     @Override
     public void notifyVisibilityChanged(int visibility) {
-        mBuilder.mSliderView.setVisibility(visibility);
         if (!mBuilder.mListeners.isEmpty()) {
             for (int i = 0; i < mBuilder.mListeners.size(); i++) {
                 Listener l = mBuilder.mListeners.get(i);
@@ -655,18 +666,10 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     
     @Override
     public final void onAnimationStart(Animator animator) {
-        if (mBuilder.mSliderView.getVisibility() != VISIBLE) {
-            notifyVisibilityChanged(VISIBLE);
-        }
     }
     
     @Override
     public final void onAnimationEnd(Animator animator) {
-        if (mAnimationProcessor.getSlideAnimationTo() != 0) {
-            if (mBuilder.mSliderView.getVisibility() != GONE) {
-                notifyVisibilityChanged(GONE);
-            }
-        }
     }
     
     @Override
