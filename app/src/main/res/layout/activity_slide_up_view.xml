@@ -17,6 +17,7 @@
         android:background="@color/dimBg" />
 
     <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/rootView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context="com.example.slideup.SlideUpViewActivity">
@@ -37,7 +38,8 @@
 
             </android.support.design.widget.AppBarLayout>
 
-            <include layout="@layout/content_slide_up_view" />
+            <include layout="@layout/content_slide_up_view"
+              tools:visibility = "gone"/>
 
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/fab"

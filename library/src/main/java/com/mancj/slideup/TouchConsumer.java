@@ -1,13 +1,15 @@
 package com.mancj.slideup;
 
+import android.view.MotionEvent;
+import android.view.View;
+
 /**
  * @author pa.gulko zTrap (12.07.2017)
  */
 class TouchConsumer {
     SlideUpBuilder mBuilder;
     AnimationProcessor mAnimationProcessor;
-    float mMaxSlidePosition;
-    
+
     boolean mCanSlide = true;
     LoggerNotifier mNotifier;
     
@@ -16,6 +18,8 @@ class TouchConsumer {
     
     float mStartPositionY;
     float mStartPositionX;
+    volatile float mPrevPositionY;
+    volatile float mPrevPositionX;
     float mViewStartPositionY;
     float mViewStartPositionX;
     
@@ -48,5 +52,9 @@ class TouchConsumer {
     
     int getBottom(){
         return mBuilder.mSliderView.getBottom();
+    }
+
+    boolean touchFromAlsoSlide(View touchedView, MotionEvent event) {
+        return touchedView == mBuilder.mAlsoScrollView;
     }
 }

@@ -59,6 +59,7 @@ public class SlideEndViewActivity extends AppCompatActivity {
                 .withStartGravity(Gravity.END)
                 .withLoggingEnabled(true)
                 .withStartState(SlideUp.State.HIDDEN)
+                .withSlideFromOtherView(findViewById(R.id.rootView))
                 .build();
 
         fab.setOnClickListener(new View.OnClickListener() {

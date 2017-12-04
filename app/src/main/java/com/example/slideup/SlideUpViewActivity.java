@@ -47,6 +47,9 @@ public class SlideUpViewActivity extends AppCompatActivity {
                     @Override
                     public void onSlide(float percent) {
                         dim.setAlpha(1 - (percent / 100));
+                        if (fab.isShown() && percent < 100) {
+                            fab.hide();
+                        }
                     }
 
                     @Override
@@ -60,13 +63,13 @@ public class SlideUpViewActivity extends AppCompatActivity {
                 .withLoggingEnabled(true)
                 .withGesturesEnabled(true)
                 .withStartState(SlideUp.State.HIDDEN)
+                .withSlideFromOtherView(findViewById(R.id.rootView))
                 .build();
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 slideUp.show();
-                fab.hide();
             }
         });
 
