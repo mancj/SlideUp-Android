@@ -1,33 +1,29 @@
 package com.mancj.slideup;
 
-import android.view.MotionEvent;
-import android.view.View;
-
 /**
  * @author pa.gulko zTrap (12.07.2017)
  */
 class TouchConsumer {
     SlideUpBuilder mBuilder;
-    AbstractSlideTranslator mTranslator;
-
+    AnimationProcessor mAnimationProcessor;
+    float mMaxSlidePosition;
+    
     boolean mCanSlide = true;
-    PercentageChangeCalculator mPercentageCalculator;
+    LoggerNotifier mNotifier;
     
     float mViewHeight;
     float mViewWidth;
     
     float mStartPositionY;
     float mStartPositionX;
-    volatile float mPrevPositionY;
-    volatile float mPrevPositionX;
     float mViewStartPositionY;
     float mViewStartPositionX;
     
-    TouchConsumer(SlideUpBuilder builder, PercentageChangeCalculator notifier,
-                  AbstractSlideTranslator translator){
+    TouchConsumer(SlideUpBuilder builder, LoggerNotifier notifier,
+                  AnimationProcessor animationProcessor){
         mBuilder = builder;
-        mTranslator = translator;
-        mPercentageCalculator = notifier;
+        mAnimationProcessor = animationProcessor;
+        mNotifier = notifier;
     }
     
     int getEnd(){
@@ -52,9 +48,5 @@ class TouchConsumer {
     
     int getBottom(){
         return mBuilder.mSliderView.getBottom();
-    }
-
-    boolean touchFromAlsoSlide(View touchedView, MotionEvent event) {
-        return touchedView == mBuilder.mAlsoScrollView;
     }
 }
