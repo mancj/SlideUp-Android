@@ -25,7 +25,7 @@ import static android.view.View.VISIBLE;
 import static com.mancj.slideup.SlideUp.State.HIDDEN;
 import static com.mancj.slideup.SlideUp.State.SHOWED;
 
-public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpdateListener, Animator.AnimatorListener, LoggerNotifier {
+public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpdateListener, Animator.AnimatorListener, LoggerNotifier, PercentageChangeCalculator {
     private final static String TAG = SlideUp.class.getSimpleName();
     
     final static String KEY_START_GRAVITY = TAG + "_start_gravity";
@@ -35,7 +35,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     final static String KEY_AUTO_SLIDE_DURATION = TAG + "_auto_slide_duration";
     final static String KEY_HIDE_SOFT_INPUT = TAG + "_hide_soft_input";
     final static String KEY_STATE_SAVED = TAG + "_state_saved";
-    
+
     /**
      * <p>Available start states</p>
      */
@@ -136,29 +136,29 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 }));
         updateToCurrentState();
     }
-    
+
     private void setTouchableAreaHorizontal(){
         if (mBuilder.mTouchableArea == 0) {
             mBuilder.mTouchableArea = (float) Math.ceil(mViewWidth / 10);
         }
     }
-    
+
     private void setTouchableAreaVertical(){
         if (mBuilder.mTouchableArea == 0) {
             mBuilder.mTouchableArea = (float) Math.ceil(mViewHeight / 10);
         }
     }
-    
+
     private void createAnimation() {
         mAnimationProcessor = new AnimationProcessor(mBuilder, this, this);
     }
-    
+
     private void createConsumers() {
         createAnimation();
         mVerticalTouchConsumer = new VerticalTouchConsumer(mBuilder, this, mAnimationProcessor);
         mHorizontalTouchConsumer = new HorizontalTouchConsumer(mBuilder, this, mAnimationProcessor);
     }
-    
+
     private void updateToCurrentState() {
         switch (mBuilder.mStartState) {
             case HIDDEN:
@@ -169,7 +169,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 break;
         }
     }
-    
+
     //region public interface
     /**
      * <p>Trying hide soft input from window</p>
@@ -180,7 +180,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
         ((InputMethodManager) mBuilder.mSliderView.getContext().getSystemService(Context.INPUT_METHOD_SERVICE))
                 .hideSoftInputFromWindow(mBuilder.mSliderView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }
-    
+
     /**
      * <p>Trying show soft input to window</p>
      *
@@ -190,7 +190,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
         ((InputMethodManager) mBuilder.mSliderView.getContext().getSystemService(Context.INPUT_METHOD_SERVICE))
                 .showSoftInput(mBuilder.mSliderView, 0);
     }
-    
+
     /**
      * <p>Returns the visibility status for this view.</p>
      *
@@ -199,28 +199,28 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     public boolean isVisible() {
         return mBuilder.mSliderView.getVisibility() == VISIBLE;
     }
-    
+
     /**
      * <p>Add Listener which will be used in combination with this SlideUp</p>
      */
     public void addSlideListener(@NonNull Listener listener) {
         mBuilder.mListeners.add(listener);
     }
-    
+
     /**
      * <p>Remove Listener which was used in combination with this SlideUp</p>
      */
     public void removeSlideListener(@NonNull Listener listener) {
         mBuilder.mListeners.remove(listener);
     }
-    
+
     /**
      * <p>Returns typed view which was used as slider</p>
      */
     public <T extends View> T getSliderView() {
         return (T) mBuilder.mSliderView;
     }
-    
+
     /**
      * <p>Set duration of animation (whenever you use {@link #hide()} or {@link #show()} methods)</p>
      *
@@ -230,14 +230,14 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
         mBuilder.withAutoSlideDuration(autoSlideDuration);
         mAnimationProcessor.paramsChanged();
     }
-    
+
     /**
      * <p>Returns duration of animation (whenever you use {@link #hide()} or {@link #show()} methods)</p>
      */
     public float getAutoSlideDuration() {
         return mBuilder.mAutoSlideDuration;
     }
-    
+
     /**
      * <p>Set touchable area <b>(in dp)</b> for interaction</p>
      *
@@ -246,7 +246,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     public void setTouchableAreaDp(float touchableArea) {
         mBuilder.withTouchableAreaDp(touchableArea);
     }
-    
+
     /**
      * <p>Set touchable area <b>(in px)</b> for interaction</p>
      *
@@ -255,21 +255,21 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     public void setTouchableAreaPx(float touchableArea) {
         mBuilder.withTouchableAreaPx(touchableArea);
     }
-    
+
     /**
      * <p>Returns touchable area <b>(in dp)</b> for interaction</p>
      */
     public float getTouchableAreaDp() {
         return mBuilder.mTouchableArea / mBuilder.mDensity;
     }
-    
+
     /**
      * <p>Returns touchable area <b>(in px)</b> for interaction</p>
      */
     public float getTouchableAreaPx() {
         return mBuilder.mTouchableArea;
     }
-    
+
     /**
      * <p>Returns running status of animation</p>
      *
@@ -278,35 +278,35 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     public boolean isAnimationRunning() {
         return mAnimationProcessor.isAnimationRunning();
     }
-    
+
     /**
      * <p>Show view with animation</p>
      */
     public void show() {
         show(false);
     }
-    
+
     /**
      * <p>Hide view with animation</p>
      */
     public void hide() {
         hide(false);
     }
-    
+
     /**
      * <p>Hide view without animation</p>
      */
     public void hideImmediately() {
         hide(true);
     }
-    
+
     /**
      * <p>Show view without animation</p>
      */
     public void showImmediately() {
         show(true);
     }
-    
+
     /**
      * <p>Turning on/off debug logging</p>
      *
@@ -315,14 +315,14 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     public void setLoggingEnabled(boolean enabled) {
         mBuilder.withLoggingEnabled(enabled);
     }
-    
+
     /**
      * <p>Returns current status of debug logging</p>
      */
     public boolean isLoggingEnabled() {
         return mBuilder.mDebug;
     }
-    
+
     /**
      * <p>Turning on/off gestures</p>
      *
@@ -331,21 +331,21 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     public void setGesturesEnabled(boolean enabled) {
         mBuilder.withGesturesEnabled(enabled);
     }
-    
+
     /**
      * <p>Returns current status of gestures</p>
      */
     public boolean isGesturesEnabled() {
         return mBuilder.mGesturesEnabled;
     }
-    
+
     /**
      * <p>Returns current interpolator</p>
      */
     public TimeInterpolator getInterpolator() {
         return mBuilder.mInterpolator;
     }
-    
+
     /**
      * <p>Returns gravity which used in combination with this SlideUp</p>
      */
@@ -353,7 +353,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     public int getStartGravity() {
         return mBuilder.mStartGravity;
     }
-    
+
     /**
      * <p>Sets interpolator for animation (whenever you use {@link #hide()} or {@link #show()} methods)</p>
      *
@@ -363,14 +363,14 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
         mBuilder.withInterpolator(interpolator);
         mAnimationProcessor.paramsChanged();
     }
-    
+
     /**
      * <p>Returns current behavior of soft input</p>
      */
     public boolean isHideKeyboardWhenDisplayed() {
         return mBuilder.mHideKeyboard;
     }
-    
+
     /**
      * <p>Sets behavior of soft input</p>
      *
@@ -379,7 +379,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
     public void setHideKeyboardWhenDisplayed(boolean hide) {
         mBuilder.withHideSoftInputWhenDisplayed(hide);
     }
-    
+
     /**
      * <p>Toggle current state with animation</p>
      */
@@ -390,7 +390,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
             show();
         }
     }
-    
+
     /**
      * <p>Toggle current state without animation</p>
      */
@@ -401,7 +401,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
             showImmediately();
         }
     }
-    
+
     /**
      * <p>Saving current parameters of SlideUp</p>
      */
@@ -415,7 +415,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
         savedState.putBoolean(KEY_HIDE_SOFT_INPUT, mBuilder.mHideKeyboard);
     }
     //endregion
-    
+
     private void hide(boolean immediately) {
         mAnimationProcessor.endAnimation();
         switch (mBuilder.mStartGravity) {
@@ -423,7 +423,6 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 if (immediately) {
                     if (mBuilder.mSliderView.getHeight() > 0) {
                         mBuilder.mSliderView.setTranslationY(-mViewHeight);
-                        notifyPercentChanged(100);
                     } else {
                         mBuilder.mStartState = HIDDEN;
                     }
@@ -435,7 +434,6 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 if (immediately) {
                     if (mBuilder.mSliderView.getHeight() > 0) {
                         mBuilder.mSliderView.setTranslationY(mViewHeight);
-                        notifyPercentChanged(100);
                     } else {
                         mBuilder.mStartState = HIDDEN;
                     }
@@ -447,7 +445,6 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 if (immediately) {
                     if (mBuilder.mSliderView.getWidth() > 0) {
                         mBuilder.mSliderView.setTranslationX(-mViewWidth);
-                        notifyPercentChanged(100);
                     } else {
                         mBuilder.mStartState = HIDDEN;
                     }
@@ -459,7 +456,6 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 if (immediately) {
                     if (mBuilder.mSliderView.getWidth() > 0) {
                         mBuilder.mSliderView.setTranslationX(mViewWidth);
-                        notifyPercentChanged(100);
                     } else {
                         mBuilder.mStartState = HIDDEN;
                     }
@@ -468,8 +464,9 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 }
                 break;
         }
+        recalculatePercentage();
     }
-    
+
     private void show(boolean immediately) {
         mAnimationProcessor.endAnimation();
         switch (mBuilder.mStartGravity) {
@@ -477,7 +474,6 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 if (immediately) {
                     if (mBuilder.mSliderView.getHeight() > 0) {
                         mBuilder.mSliderView.setTranslationY(0);
-                        notifyPercentChanged(0);
                     } else {
                         mBuilder.mStartState = SHOWED;
                     }
@@ -488,7 +484,6 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 if (immediately) {
                     if (mBuilder.mSliderView.getHeight() > 0) {
                         mBuilder.mSliderView.setTranslationY(0);
-                        notifyPercentChanged(0);
                     } else {
                         mBuilder.mStartState = SHOWED;
                     }
@@ -500,7 +495,6 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 if (immediately) {
                     if (mBuilder.mSliderView.getWidth() > 0) {
                         mBuilder.mSliderView.setTranslationX(0);
-                        notifyPercentChanged(0);
                     } else {
                         mBuilder.mStartState = SHOWED;
                     }
@@ -511,7 +505,6 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 if (immediately) {
                     if (mBuilder.mSliderView.getWidth() > 0) {
                         mBuilder.mSliderView.setTranslationX(0);
-                        notifyPercentChanged(0);
                     } else {
                         mBuilder.mStartState = SHOWED;
                     }
@@ -520,8 +513,9 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 }
                 break;
         }
+        recalculatePercentage();
     }
-    
+
     @Override
     public final boolean onTouch(View v, MotionEvent event) {
         if (mAnimationProcessor.isAnimationRunning()) return false;
@@ -551,7 +545,7 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
         }
         return true;
     }
-    
+
     @Override
     public final void onAnimationUpdate(ValueAnimator animation) {
         float value = (float) animation.getAnimatedValue();
@@ -569,36 +563,53 @@ public class SlideUp implements View.OnTouchListener, ValueAnimator.AnimatorUpda
                 onAnimationUpdateEndToStart(value);
                 break;
         }
+        recalculatePercentage();
     }
-    
+
     private void onAnimationUpdateTopToBottom(float value) {
         mBuilder.mSliderView.setTranslationY(-value);
-        float visibleDistance = mBuilder.mSliderView.getTop() - mBuilder.mSliderView.getY();
-        float percents = (visibleDistance) * 100 / mViewHeight;
-        notifyPercentChanged(percents);
     }
-    
+
     private void onAnimationUpdateBottomToTop(float value) {
         mBuilder.mSliderView.setTranslationY(value);
-        float visibleDistance = mBuilder.mSliderView.getY() - mBuilder.mSliderView.getTop();
-        float percents = (visibleDistance) * 100 / mViewHeight;
-        notifyPercentChanged(percents);
     }
-    
+
     private void onAnimationUpdateStartToEnd(float value) {
         mBuilder.mSliderView.setTranslationX(-value);
-        float visibleDistance = mBuilder.mSliderView.getX() - getStart();
-        float percents = (visibleDistance) * 100 / -mViewWidth;
-        notifyPercentChanged(percents);
     }
-    
+
     private void onAnimationUpdateEndToStart(float value) {
         mBuilder.mSliderView.setTranslationX(value);
-        float visibleDistance = mBuilder.mSliderView.getX() - getStart();
-        float percents = (visibleDistance) * 100 / mViewWidth;
-        notifyPercentChanged(percents);
     }
-    
+
+    @Override
+    public float recalculatePercentage() {
+        final float percents;
+        final float visibleDistance;
+        switch (mBuilder.mStartGravity) {
+            case TOP:
+                visibleDistance = mBuilder.mSliderView.getTop() - mBuilder.mSliderView.getY();
+                percents = (visibleDistance) * 100 / mViewHeight;
+                break;
+            case BOTTOM:
+                visibleDistance = mBuilder.mSliderView.getY() - mBuilder.mSliderView.getTop();
+                percents = (visibleDistance) * 100 / mViewHeight;
+                break;
+            case START:
+                visibleDistance = mBuilder.mSliderView.getX() - getStart();
+                percents = (visibleDistance) * 100 / -mViewWidth;
+                break;
+
+            case END:
+                visibleDistance = mBuilder.mSliderView.getX() - getStart();
+                percents = (visibleDistance) * 100 / mViewWidth;
+                break;
+            default: throw new RuntimeException("Invalid hidden gravity of the slide view.");
+        }
+        notifyPercentChanged(percents);
+        return percents;
+    }
+
     private int getStart() {
         if (mBuilder.mIsRTL) {
             return mBuilder.mSliderView.getRight();

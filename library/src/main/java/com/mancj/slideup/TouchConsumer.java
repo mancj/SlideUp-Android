@@ -11,7 +11,7 @@ class TouchConsumer {
     AnimationProcessor mAnimationProcessor;
 
     boolean mCanSlide = true;
-    LoggerNotifier mNotifier;
+    PercentageChangeCalculator mPercentageCalculator;
     
     float mViewHeight;
     float mViewWidth;
@@ -23,11 +23,11 @@ class TouchConsumer {
     float mViewStartPositionY;
     float mViewStartPositionX;
     
-    TouchConsumer(SlideUpBuilder builder, LoggerNotifier notifier,
+    TouchConsumer(SlideUpBuilder builder, PercentageChangeCalculator notifier,
                   AnimationProcessor animationProcessor){
         mBuilder = builder;
         mAnimationProcessor = animationProcessor;
-        mNotifier = notifier;
+        mPercentageCalculator = notifier;
     }
     
     int getEnd(){

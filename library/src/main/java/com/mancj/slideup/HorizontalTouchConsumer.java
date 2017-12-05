@@ -10,8 +10,8 @@ class HorizontalTouchConsumer extends TouchConsumer {
     private boolean mGoingToStart = false;
     private boolean mGoingToEnd = false;
     
-    HorizontalTouchConsumer(SlideUpBuilder builder, LoggerNotifier notifier, AnimationProcessor animationProcessor) {
-        super(builder, notifier, animationProcessor);
+    HorizontalTouchConsumer(SlideUpBuilder builder, PercentageChangeCalculator percentageChangeCalculator, AnimationProcessor animationProcessor) {
+        super(builder, percentageChangeCalculator, animationProcessor);
     }
     
     boolean consumeEndToStart(View touchedView, MotionEvent event){
@@ -31,8 +31,8 @@ class HorizontalTouchConsumer extends TouchConsumer {
                 calculateDirection(event);
                 
                 if (moveTo > 0 && mCanSlide){
-                    mNotifier.notifyPercentChanged(percents);
                     mBuilder.mSliderView.setTranslationX(moveTo);
+                    mPercentageCalculator.recalculatePercentage();
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -72,8 +72,8 @@ class HorizontalTouchConsumer extends TouchConsumer {
                 calculateDirection(event);
                 
                 if (moveTo < 0 && mCanSlide){
-                    mNotifier.notifyPercentChanged(percents);
                     mBuilder.mSliderView.setTranslationX(moveTo);
+                    mPercentageCalculator.recalculatePercentage();
                 }
                 break;
             case MotionEvent.ACTION_UP:

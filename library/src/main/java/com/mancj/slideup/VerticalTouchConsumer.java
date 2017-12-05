@@ -10,8 +10,8 @@ class VerticalTouchConsumer extends TouchConsumer {
     private boolean mGoingUp = false;
     private boolean mGoingDown = false;
     
-    VerticalTouchConsumer(SlideUpBuilder builder, LoggerNotifier notifier, AnimationProcessor animationProcessor) {
-        super(builder, notifier, animationProcessor);
+    VerticalTouchConsumer(SlideUpBuilder builder, PercentageChangeCalculator percentageChangeCalculator, AnimationProcessor animationProcessor) {
+        super(builder, percentageChangeCalculator, animationProcessor);
     }
     
     boolean consumeBottomToTop(View touchedView, MotionEvent event){
@@ -31,13 +31,13 @@ class VerticalTouchConsumer extends TouchConsumer {
                 calculateDirection(event);
                 
                 if (moveTo > 0 && mCanSlide){
-                    mNotifier.notifyPercentChanged(percents);
                     mBuilder.mSliderView.setTranslationY(moveTo);
+                    mPercentageCalculator.recalculatePercentage();
                 }
                 break;
             case MotionEvent.ACTION_UP:
                 float slideAnimationFrom = mBuilder.mSliderView.getTranslationY();
-                if (slideAnimationFrom == mViewStartPositionY){
+                if (slideAnimationFrom == mViewStartPositionY) {
                     return !Internal.isUpEventInView(mBuilder.mSliderView, event);
                 }
                 boolean scrollableAreaConsumed = mBuilder.mSliderView.getTranslationY() > mBuilder.mSliderView.getHeight() / 5;
@@ -70,12 +70,11 @@ class VerticalTouchConsumer extends TouchConsumer {
             case MotionEvent.ACTION_MOVE:
                 float difference = event.getRawY() - mStartPositionY;
                 float moveTo = mViewStartPositionY + difference;
-                float percents = moveTo * 100 / -mBuilder.mSliderView.getHeight();
                 calculateDirection(event);
             
                 if (moveTo < 0 && mCanSlide){
-                    mNotifier.notifyPercentChanged(percents);
                     mBuilder.mSliderView.setTranslationY(moveTo);
+                    mPercentageCalculator.recalculatePercentage();
                 }
                 break;
             case MotionEvent.ACTION_UP:
