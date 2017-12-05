@@ -8,7 +8,7 @@ import android.view.View;
  */
 class TouchConsumer {
     SlideUpBuilder mBuilder;
-    AnimationProcessor mAnimationProcessor;
+    AbstractSlideTranslator mTranslator;
 
     boolean mCanSlide = true;
     PercentageChangeCalculator mPercentageCalculator;
@@ -24,9 +24,9 @@ class TouchConsumer {
     float mViewStartPositionX;
     
     TouchConsumer(SlideUpBuilder builder, PercentageChangeCalculator notifier,
-                  AnimationProcessor animationProcessor){
+                  AbstractSlideTranslator translator){
         mBuilder = builder;
-        mAnimationProcessor = animationProcessor;
+        mTranslator = translator;
         mPercentageCalculator = notifier;
     }
     

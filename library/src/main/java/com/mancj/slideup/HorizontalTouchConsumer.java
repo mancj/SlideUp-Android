@@ -10,8 +10,8 @@ class HorizontalTouchConsumer extends TouchConsumer {
     private boolean mGoingToStart = false;
     private boolean mGoingToEnd = false;
     
-    HorizontalTouchConsumer(SlideUpBuilder builder, PercentageChangeCalculator percentageChangeCalculator, AnimationProcessor animationProcessor) {
-        super(builder, percentageChangeCalculator, animationProcessor);
+    HorizontalTouchConsumer(SlideUpBuilder builder, PercentageChangeCalculator percentageChangeCalculator, AbstractSlideTranslator translator) {
+        super(builder, percentageChangeCalculator, translator);
     }
     
     boolean consumeEndToStart(View touchedView, MotionEvent event){
@@ -27,7 +27,6 @@ class HorizontalTouchConsumer extends TouchConsumer {
             case MotionEvent.ACTION_MOVE:
                 float difference = event.getRawX() - mStartPositionX;
                 float moveTo = mViewStartPositionX + difference;
-                float percents = moveTo * 100 / mBuilder.mSliderView.getWidth();
                 calculateDirection(event);
                 
                 if (moveTo > 0 && mCanSlide){
@@ -43,9 +42,9 @@ class HorizontalTouchConsumer extends TouchConsumer {
                 boolean scrollableAreaConsumed = mBuilder.mSliderView.getTranslationX() > mBuilder.mSliderView.getWidth() / 5;
                 
                 if (scrollableAreaConsumed && mGoingToEnd){
-                    mAnimationProcessor.setValuesAndStart(slideAnimationFrom, mBuilder.mSliderView.getWidth());
+                    mTranslator.hideSlideView(false);
                 }else {
-                    mAnimationProcessor.setValuesAndStart(slideAnimationFrom, 0);
+                    mTranslator.showSlideView(false);
                 }
                 mCanSlide = true;
                 break;
@@ -68,7 +67,6 @@ class HorizontalTouchConsumer extends TouchConsumer {
             case MotionEvent.ACTION_MOVE:
                 float difference = event.getRawX() - mStartPositionX;
                 float moveTo = mViewStartPositionX + difference;
-                float percents = moveTo * 100 / -mBuilder.mSliderView.getWidth();
                 calculateDirection(event);
                 
                 if (moveTo < 0 && mCanSlide){
@@ -84,9 +82,9 @@ class HorizontalTouchConsumer extends TouchConsumer {
                 boolean scrollableAreaConsumed = mBuilder.mSliderView.getTranslationX() < -mBuilder.mSliderView.getHeight() / 5;
                 
                 if (scrollableAreaConsumed && mGoingToStart){
-                    mAnimationProcessor.setValuesAndStart(slideAnimationFrom, mBuilder.mSliderView.getWidth());
+                    mTranslator.hideSlideView(false);
                 }else {
-                    mAnimationProcessor.setValuesAndStart(slideAnimationFrom, 0);
+                    mTranslator.showSlideView(false);
                 }
                 mCanSlide = true;
                 break;

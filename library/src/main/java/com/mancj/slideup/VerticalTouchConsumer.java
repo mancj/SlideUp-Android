@@ -10,8 +10,8 @@ class VerticalTouchConsumer extends TouchConsumer {
     private boolean mGoingUp = false;
     private boolean mGoingDown = false;
     
-    VerticalTouchConsumer(SlideUpBuilder builder, PercentageChangeCalculator percentageChangeCalculator, AnimationProcessor animationProcessor) {
-        super(builder, percentageChangeCalculator, animationProcessor);
+    VerticalTouchConsumer(SlideUpBuilder builder, PercentageChangeCalculator percentageChangeCalculator, AbstractSlideTranslator translator) {
+        super(builder, percentageChangeCalculator, translator);
     }
     
     boolean consumeBottomToTop(View touchedView, MotionEvent event){
@@ -43,9 +43,9 @@ class VerticalTouchConsumer extends TouchConsumer {
                 boolean scrollableAreaConsumed = mBuilder.mSliderView.getTranslationY() > mBuilder.mSliderView.getHeight() / 5;
                 
                 if (scrollableAreaConsumed && mGoingDown){
-                    mAnimationProcessor.setValuesAndStart(slideAnimationFrom, mBuilder.mSliderView.getHeight());
+                    mTranslator.hideSlideView(false);
                 } else {
-                    mAnimationProcessor.setValuesAndStart(slideAnimationFrom, 0);
+                    mTranslator.showSlideView(false);
                 }
                 mCanSlide = true;
                 mGoingUp = false;
@@ -85,9 +85,9 @@ class VerticalTouchConsumer extends TouchConsumer {
                 boolean scrollableAreaConsumed = mBuilder.mSliderView.getTranslationY() < -mBuilder.mSliderView.getHeight() / 5;
             
                 if (scrollableAreaConsumed && mGoingUp){
-                    mAnimationProcessor.setValuesAndStart(slideAnimationFrom, mBuilder.mSliderView.getHeight() + mBuilder.mSliderView.getTop());
+                    mTranslator.hideSlideView(false);
                 }else {
-                    mAnimationProcessor.setValuesAndStart(slideAnimationFrom, 0);
+                    mTranslator.showSlideView(true);
                 }
                 mCanSlide = true;
                 break;
