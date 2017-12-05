@@ -1,36 +1,37 @@
 package com.mancj.slideup;
 
 import android.view.MotionEvent;
+import android.view.View;
 
 /**
  * @author pa.gulko zTrap (12.07.2017)
  */
 class HorizontalTouchConsumer extends TouchConsumer {
+    private boolean mGoingToStart = false;
+    private boolean mGoingToEnd = false;
     
-    HorizontalTouchConsumer(SlideUpBuilder builder, LoggerNotifier notifier, AnimationProcessor animationProcessor) {
-        super(builder, notifier, animationProcessor);
+    HorizontalTouchConsumer(SlideUpBuilder builder, PercentageChangeCalculator percentageChangeCalculator, AbstractSlideTranslator translator) {
+        super(builder, percentageChangeCalculator, translator);
     }
     
-    boolean consumeEndToStart(MotionEvent event){
+    boolean consumeEndToStart(View touchedView, MotionEvent event){
         float touchedArea = event.getX();
         switch (event.getActionMasked()){
             case MotionEvent.ACTION_DOWN:
                 mViewWidth = mBuilder.mSliderView.getWidth();
                 mStartPositionX = event.getRawX();
                 mViewStartPositionX = mBuilder.mSliderView.getTranslationX();
-                mCanSlide = getStart() + mBuilder.mTouchableArea >= touchedArea;
+                mCanSlide = touchFromAlsoSlide(touchedView, event);
+                mCanSlide |= getStart() + mBuilder.mTouchableArea >= touchedArea;
                 break;
             case MotionEvent.ACTION_MOVE:
                 float difference = event.getRawX() - mStartPositionX;
                 float moveTo = mViewStartPositionX + difference;
-                float percents = moveTo * 100 / mBuilder.mSliderView.getWidth();
+                calculateDirection(event);
                 
                 if (moveTo > 0 && mCanSlide){
-                    mNotifier.notifyPercentChanged(percents);
                     mBuilder.mSliderView.setTranslationX(moveTo);
-                }
-                if (event.getRawX() > mMaxSlidePosition) {
-                    mMaxSlidePosition = event.getRawX();
+                    mPercentageCalculator.recalculatePercentage();
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -38,42 +39,39 @@ class HorizontalTouchConsumer extends TouchConsumer {
                 if (slideAnimationFrom == mViewStartPositionX){
                     return !Internal.isUpEventInView(mBuilder.mSliderView, event);
                 }
-                boolean mustShow = mMaxSlidePosition > event.getRawX();
                 boolean scrollableAreaConsumed = mBuilder.mSliderView.getTranslationX() > mBuilder.mSliderView.getWidth() / 5;
                 
-                if (scrollableAreaConsumed && !mustShow){
-                    mAnimationProcessor.setValuesAndStart(slideAnimationFrom, mBuilder.mSliderView.getWidth());
+                if (scrollableAreaConsumed && mGoingToEnd){
+                    mTranslator.hideSlideView(false);
                 }else {
-                    mAnimationProcessor.setValuesAndStart(slideAnimationFrom, 0);
+                    mTranslator.showSlideView(false);
                 }
                 mCanSlide = true;
-                mMaxSlidePosition = 0;
                 break;
         }
+        mPrevPositionY = event.getRawY();
+        mPrevPositionX = event.getRawX();
         return true;
     }
     
-    boolean consumeStartToEnd(MotionEvent event){
+    boolean consumeStartToEnd(View touchedView, MotionEvent event){
         float touchedArea = event.getX();
         switch (event.getActionMasked()){
             case MotionEvent.ACTION_DOWN:
-                mMaxSlidePosition = mViewWidth;
                 mViewWidth = mBuilder.mSliderView.getWidth();
                 mStartPositionX = event.getRawX();
                 mViewStartPositionX = mBuilder.mSliderView.getTranslationX();
-                mCanSlide = getEnd() - mBuilder.mTouchableArea >= touchedArea;
+                mCanSlide = touchFromAlsoSlide(touchedView, event);
+                mCanSlide |= getEnd() - mBuilder.mTouchableArea >= touchedArea;
                 break;
             case MotionEvent.ACTION_MOVE:
                 float difference = event.getRawX() - mStartPositionX;
                 float moveTo = mViewStartPositionX + difference;
-                float percents = moveTo * 100 / -mBuilder.mSliderView.getWidth();
+                calculateDirection(event);
                 
                 if (moveTo < 0 && mCanSlide){
-                    mNotifier.notifyPercentChanged(percents);
                     mBuilder.mSliderView.setTranslationX(moveTo);
-                }
-                if (event.getRawX() < mMaxSlidePosition) {
-                    mMaxSlidePosition = event.getRawX();
+                    mPercentageCalculator.recalculatePercentage();
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -81,18 +79,23 @@ class HorizontalTouchConsumer extends TouchConsumer {
                 if (slideAnimationFrom == mViewStartPositionX){
                     return !Internal.isUpEventInView(mBuilder.mSliderView, event);
                 }
-                boolean mustShow = mMaxSlidePosition < event.getRawX();
                 boolean scrollableAreaConsumed = mBuilder.mSliderView.getTranslationX() < -mBuilder.mSliderView.getHeight() / 5;
                 
-                if (scrollableAreaConsumed && !mustShow){
-                    mAnimationProcessor.setValuesAndStart(slideAnimationFrom, mBuilder.mSliderView.getWidth());
+                if (scrollableAreaConsumed && mGoingToStart){
+                    mTranslator.hideSlideView(false);
                 }else {
-                    mAnimationProcessor.setValuesAndStart(slideAnimationFrom, 0);
+                    mTranslator.showSlideView(false);
                 }
                 mCanSlide = true;
-                mMaxSlidePosition = 0;
                 break;
         }
+        mPrevPositionY = event.getRawY();
+        mPrevPositionX = event.getRawX();
         return true;
+    }
+
+    private void calculateDirection(MotionEvent event) {
+        mGoingToStart = mPrevPositionX - event.getRawX() > 0;
+        mGoingToEnd = mPrevPositionX - event.getRawX() < 0;
     }
 }
