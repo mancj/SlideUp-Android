@@ -30,7 +30,8 @@ public final class SlideUpBuilder {
     boolean mGesturesEnabled = true;
     boolean mHideKeyboard = false;
     TimeInterpolator mInterpolator = new DecelerateInterpolator();
-    
+    View mAlsoScrollView;
+
     /**
      * <p>Construct a SlideUp by passing the view or his child to use for the generation</p>
      */
@@ -173,6 +174,17 @@ public final class SlideUpBuilder {
      */
     public SlideUpBuilder withSavedState(@Nullable Bundle savedState) {
         restoreParams(savedState);
+        return this;
+    }
+
+
+    /**
+     * <p>Provide a {@link View} that will also trigger slide events on the {@link SlideUp}.</p>
+     *
+     * @param alsoScrollView the other view that will trigger the slide events
+     */
+    public SlideUpBuilder withSlideFromOtherView(@Nullable View alsoScrollView) {
+        mAlsoScrollView = alsoScrollView;
         return this;
     }
     
