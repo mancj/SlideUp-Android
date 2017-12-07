@@ -88,7 +88,7 @@ slideUp = new SlideUpBuilder(slideView)
                  dim.setAlpha(1 - (percent / 100));
                  if (percent < 100) {
                     // slideUp started showing
-                    fab.hide()
+                    fab.hide();
                  }
              }
 
