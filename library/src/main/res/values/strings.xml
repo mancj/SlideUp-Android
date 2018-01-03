@@ -12,7 +12,7 @@
         ]]>
     </string>
     <string name="library_slideup_android_libraryWebsite">https://github.com/mancj/SlideUp-Android/</string>
-    <string name="library_slideup_android_libraryVersion">2.2.7.1</string>
+    <string name="library_slideup_android_libraryVersion">2.2.8</string>
     <!-- OpenSource section -->
     <string name="library_slideup_android_isOpenSource">true</string>
     <string name="library_slideup_android_repositoryLink">https://github.com/mancj/SlideUp-Android/blob/master/LICENSE</string>
@@ -22,5 +22,5 @@
     <string name="library_slideup_android_licenseId">mit</string>
     <!-- Custom variables section -->
     <string name="library_slideup_android_owner">Mancj</string>
-    <string name="library_slideup_android_year">2017</string>
+    <string name="library_slideup_android_year">2018</string>
 </resources>

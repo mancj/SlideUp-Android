@@ -4,3 +4,4 @@ captures/
 local.properties
 .idea/
 */*.iml
+/SlideUp-Android.iml

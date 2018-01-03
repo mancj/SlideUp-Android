@@ -16,7 +16,6 @@ allprojects {
   repositories {
     ...
     maven { url 'https://jitpack.io' }
-    maven { url "https://maven.google.com" } // or google() in AS 3.0
   }
 }
 ```
@@ -86,7 +85,7 @@ slideUp = new SlideUpBuilder(slideView)
              @Override
              public void onSlide(float percent) {
                  dim.setAlpha(1 - (percent / 100));
-                 if (percent < 100) {
+                 if (percent < 100 && fab.isShown()) {
                     // slideUp started showing
                     fab.hide();
                  }
@@ -135,7 +134,7 @@ We want to collect and publish this list.
 
     MIT License
 
-    Copyright (c) 2017 Mansur
+    Copyright (c) 2018 Mansur
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal

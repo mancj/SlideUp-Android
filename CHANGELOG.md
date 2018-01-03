@@ -1,3 +1,7 @@
+## v2.2.8 (03.01.2018)
+  - Add capability to trigger SlideUp (up/down/start/end) from another View **thanks [@toteto](https://github.com/toteto)**
+  - Dropped support Android < 14 api level
+  
 ## v2.2.7.1 (25.07.2017)
   - Fixed wrong identifiers for [AboutLibraries](https://github.com/mikepenz/AboutLibraries) (© MikePenz)
   
