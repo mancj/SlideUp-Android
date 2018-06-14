@@ -6,7 +6,7 @@ SlideUp is a small library that allows you to add sweet slide effect to any view
 
 [Example gif 1](https://i.imgur.com/7S5qqSy.gifv)
 
-[Example gif 2](https://i.imgur.com/hKWqyl1.gifv)
+[Example gif 2](https://i.imgur.com/hKWqyl1.gif)
 
 -----
 # Usage
